@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="BrainLink" default="all">
+   <dirname property="base.directory" file="${ant.file}"/>
+   <property file="build.properties"/>
+
+   <!-- Paths -->
+   <path id="brainlink-core-classpath">
+      <!-- third-party jars -->
+      <pathelement path="${create-lab-commons-device.jar}"/>
+      <pathelement path="${create-lab-commons-serial.jar}"/>
+      <pathelement path="${create-lab-commons-util.jar}"/>
+      <pathelement path="${log4j.jar}"/>
+      <pathelement path="${rxtx.jar}"/>
+   </path>
+
+   <path id="brainlink-applications-classpath">
+      <!-- other classes within this project -->
+      <pathelement path="${brainlink-core.build.dir}"/>
+
+      <!-- third-party jars -->
+      <pathelement path="${create-lab-commons-device.jar}"/>
+      <pathelement path="${create-lab-commons-serial.jar}"/>
+      <pathelement path="${create-lab-commons-util.jar}"/>
+      <pathelement path="${log4j.jar}"/>
+      <pathelement path="${rxtx.jar}"/>
+   </path>
+
+   <!-- Compiler resources -->
+   <patternset id="compiler.resources">
+      <!-- excluded files -->
+      <exclude name="**/CVS/**"/>
+      <exclude name="**/SCCS/**"/>
+      <exclude name="**/RCS/**"/>
+      <exclude name="**/rcs/**"/>
+      <exclude name="**/.DS_Store/**"/>
+      <exclude name="**/.svn/**"/>
+      <!-- included files -->
+      <include name="**/?*.properties"/>
+      <include name="**/?*.xml"/>
+      <include name="**/?*.htm"/>
+      <include name="**/?*.html"/>
+      <include name="**/?*.dtd"/>
+      <include name="**/?*.tld"/>
+      <include name="**/?*.xsd"/>
+      <include name="**/?*.xsl"/>
+      <include name="**/?*.gif"/>
+      <include name="**/?*.png"/>
+      <include name="**/?*.jpeg"/>
+      <include name="**/?*.jpg"/>
+      <include name="**/?*.dll"/>
+      <include name="**/?*.lib"/>
+      <include name="**/?*.ice"/>
+      <include name="**/?*.pem"/>
+   </patternset>
+
+   <tstamp>
+      <format property="build.timestamp" pattern="yyyy-MM-dd hh:mm:ss a z"/>
+   </tstamp>
+
+   <target name="all" depends="clean, dist" description="clean, then build everything"/>
+
+   <target name="clean" depends="clean-brainlink-core,
+                                 clean-brainlink-applications" description="clean up everything"/>
+
+   <target name="clean-brainlink-core" description="clean up brainlink-core">
+      <delete dir="${brainlink-core.build.dir}"/>
+      <delete dir="${brainlink-core.dist.dir}"/>
+   </target>
+
+   <target name="clean-brainlink-applications" description="clean up brainlink-applications">
+      <delete dir="${brainlink-applications.build.dir}"/>
+      <delete dir="${brainlink-applications.dist.dir}"/>
+   </target>
+
+   <target name="build" depends="build-brainlink-core, build-brainlink-applications" description="builds the source code" unless="build-is-complete">
+      <property name="build-is-complete" value="true"/>
+   </target>
+
+   <target name="build-brainlink-core" description="builds the brainlink-core source code" unless="build-brainlink-core-is-complete">
+      <compile-code-and-copy-resources src.dir="${brainlink-core.src.dir}"
+                                       build.dir="${brainlink-core.build.dir}"
+                                       classpath-ref="brainlink-core-classpath"/>
+
+      <property name="build-brainlink-core-is-complete" value="true"/>
+   </target>
+
+   <target name="build-brainlink-applications" depends="build-brainlink-core" description="builds the brainlink-applications source code" unless="build-brainlink-applications-is-complete">
+      <compile-code-and-copy-resources src.dir="${brainlink-applications.src.dir}"
+                                       build.dir="${brainlink-applications.build.dir}"
+                                       classpath-ref="brainlink-applications-classpath"/>
+
+      <property name="build-brainlink-applications-is-complete" value="true"/>
+   </target>
+
+   <target name="dist" depends="dist-brainlink-core, dist-brainlink-applications" description="builds the project" unless="dist-is-complete">
+      <property name="dist-is-complete" value="true"/>
+   </target>
+
+   <target name="dist-brainlink-core" depends="build-brainlink-core" description="builds brainlink-core" unless="dist-brainlink-core-is-complete">
+      <create-dist component.name="brainlink-core">
+         <additional-files-to-copy>
+            <fileset file="${create-lab-commons-device.jar}"/>
+            <fileset file="${create-lab-commons-serial.jar}"/>
+            <fileset file="${create-lab-commons-util.jar}"/>
+            <fileset file="${rxtx.jar}"/>
+            <fileset file="${rxtx-macos.native}"/>
+            <fileset file="${rxtx-linux.native}"/>
+            <fileset file="${rxtx-windows.native1}"/>
+            <fileset file="${rxtx-windows.native2}"/>
+         </additional-files-to-copy>
+      </create-dist>
+
+      <property name="dist-brainlink-core-is-complete" value="true"/>
+   </target>
+
+   <target name="dist-brainlink-applications" depends="dist-brainlink-core, build-brainlink-applications" description="builds brainlink-applications" unless="dist-brainlink-applications-is-complete">
+      <mkdir dir="${brainlink-applications.dist.dir}"/>
+
+      <!-- create jar of resources, using the logging config file required for console-only logging -->
+      <jar destfile="${brainlink-applications.dist.dir}/${brainlink-applications-resources-jar.filename}"
+           update="no"
+           compress="true">
+         <fileset dir="${resources.logging.dir}/console" includes="**/*"/>
+      </jar>
+
+      <create-dist component.name="brainlink-applications">
+         <additional-files-to-copy>
+            <fileset file="${brainlink-core.dist.dir}/${brainlink-core.jar.filename}"/>
+            <fileset file="${create-lab-commons-device.jar}"/>
+            <fileset file="${create-lab-commons-serial.jar}"/>
+            <fileset file="${create-lab-commons-util.jar}"/>
+            <fileset file="${rxtx.jar}"/>
+            <fileset file="${rxtx-macos.native}"/>
+            <fileset file="${rxtx-linux.native}"/>
+            <fileset file="${rxtx-windows.native1}"/>
+            <fileset file="${rxtx-windows.native2}"/>
+         </additional-files-to-copy>
+      </create-dist>
+
+      <property name="dist-brainlink-applications-is-complete" value="true"/>
+   </target>
+
+   <target name="create-distro-zip" depends="dist" description="builds the zip for distributing to students, etc." unless="create-distro-zip-is-complete">
+      <!-- create the temporary zip directory -->
+      <mkdir dir="${zip.dir}"/>
+
+      <!-- Create the big honkin' jar containing all the jars from dist-brainlink-applications and the log4j.xml file for
+      file logging. -->
+      <jar destfile="${brainlink.jar}" update="yes" compress="true">
+         <zipfileset dir="${resources.logging.dir}/file" includes="**/*"/>
+         <zipgroupfileset dir="${brainlink-applications.dist.dir}" includes="**/*.jar" excludes="${brainlink-applications-resources-jar.filename}"/>
+      </jar>
+
+      <!-- create javadocs -->
+      <javadoc packagenames="*"
+               destdir="${zip.dir}/javadoc"
+               author="true"
+               version="true"
+               windowtitle="BrainLink API"
+               doctitle="BrainLink API"
+               protected="true"
+               notree="true"
+               noindex="true">
+         <classpath>
+            <path refid="brainlink-applications-classpath"/>
+         </classpath>
+         <!-- Use fileset instead of packageset since it has classes in the default package -->
+         <fileset dir="${brainlink-applications.src.dir}" includes="**/*.java"/>
+         <link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+      </javadoc>
+
+      <!-- create zip of the directory -->
+      <zip destfile="${base.directory}/${zip.filename}"
+           compress="true">
+         <zipfileset dir="${zip.dir}" prefix="brainlink"/>
+      </zip>
+
+      <!-- delete the temporary zip directory -->
+      <delete dir="${zip.dir}"/>
+
+      <property name="create-distro-zip-is-complete" value="true"/>
+   </target>
+   <!-- ============================================================================================================ -->
+   <!-- Macro definitions -->
+   <!-- ============================================================================================================ -->
+
+   <macrodef name="compile-code-and-copy-resources">
+      <attribute name="classpath-ref"/>
+      <attribute name="build.dir"/>
+      <attribute name="src.dir"/>
+      <element name="resources-filterset" optional="true"/>
+      <sequential>
+         <!-- create the build directory -->
+         <mkdir dir="@{build.dir}"/>
+
+         <!-- compile code -->
+         <javac srcdir="@{src.dir}"
+                destdir="@{build.dir}"
+                classpathref="@{classpath-ref}"
+                debug="${java.compiler.debug}"
+                nowarn="${java.compiler.generate.no.warnings}"
+                memorymaximumsize="${java.compiler.max.memory}"
+                source="${java.compiler.source.level}"
+                target="${java.compiler.target.level}"
+                fork="true"
+                includeAntRuntime="false">
+            <compilerarg line="${java.compiler.args}"/>
+         </javac>
+
+         <!-- copy resources -->
+         <copy todir="@{build.dir}">
+            <fileset dir="@{src.dir}">
+               <patternset refid="compiler.resources"/>
+            </fileset>
+            <resources-filterset/>
+         </copy>
+
+      </sequential>
+   </macrodef>
+
+   <macrodef name="create-dist">
+      <attribute name="component.name"/>
+      <element name="jar-manifest-attributes" optional="true"/>
+      <element name="additional-files-to-copy" optional="true"/>
+      <sequential>
+         <!-- create the dist directory -->
+         <mkdir dir="${@{component.name}.dist.dir}"/>
+
+         <!-- copy required jar files and native lib -->
+         <copy todir="${@{component.name}.dist.dir}" flatten="true">
+            <fileset file="${log4j.jar}"/>
+            <additional-files-to-copy/>
+         </copy>
+
+         <!-- define the execution classpath for use in the scripts -->
+         <path id="@{component.name}.execution.classpath.elements">
+            <pathelement location="${@{component.name}.dist.dir}"/>
+            <fileset dir="${@{component.name}.dist.dir}">
+               <include name="**/*.jar"/>
+               <include name="**/*.dll"/>
+               <include name="**/*.so"/>
+            </fileset>
+         </path>
+
+         <!-- Set up a path id for the dist directory so it contains the correct kind of slashes when we do the pathconvert mapping -->
+         <path id="dist-@{component.name}.dir.before-conversion" path="${@{component.name}.dist.dir}"/>
+
+         <!-- Convert the dist directory path for the target platform to ensure that all the slashes are in the right direction -->
+         <pathconvert property="dist-@{component.name}.dir.after-conversion" dirsep="/" pathsep=":" refid="dist-@{component.name}.dir.before-conversion"/>
+
+         <!-- Create the classpath -->
+         <pathconvert property="@{component.name}.execution.classpath" dirsep="/" pathsep=" " refid="@{component.name}.execution.classpath.elements">
+            <map from="${dist-@{component.name}.dir.after-conversion}" to="."/>
+         </pathconvert>
+
+         <!-- create jar of Java classes -->
+         <jar destfile="${@{component.name}.dist.dir}/${@{component.name}.jar.filename}"
+              basedir="${@{component.name}.build.dir}"
+              update="no"
+              compress="true">
+            <manifest>
+               <attribute name="Built-By" value="${jar.built-by}"/>
+               <attribute name="Build-Timestamp" value="${build.timestamp}"/>
+               <attribute name="Class-Path" value="${@{component.name}.execution.classpath}"/>
+               <jar-manifest-attributes/>
+            </manifest>
+         </jar>
+
+      </sequential>
+   </macrodef>
+
+</project>
