@@ -19,7 +19,7 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
       new CommandLineBrainLink(in).run();
       }
 
-   private BrainLink brainLinkProxy;
+   private BrainLink brainLink;
 
    private CommandLineBrainLink(final BufferedReader in)
       {
@@ -28,9 +28,9 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
 
    protected boolean connect(final String serialPortName)
       {
-      brainLinkProxy = BrainLinkProxy.create(serialPortName);
+      brainLink = BrainLinkProxy.create(serialPortName);
 
-      if (brainLinkProxy == null)
+      if (brainLink == null)
          {
          println("Connection failed.");
          return false;
@@ -38,13 +38,13 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
       else
          {
          println("Connection successful.");
-         brainLinkProxy.addCreateLabDevicePingFailureEventListener(
+         brainLink.addCreateLabDevicePingFailureEventListener(
                new CreateLabDevicePingFailureEventListener()
                {
                public void handlePingFailureEvent()
                   {
                   println("BrainLink ping failure detected.  You will need to reconnect.");
-                  brainLinkProxy = null;
+                  brainLink = null;
                   }
                });
          return true;
@@ -53,25 +53,25 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
 
    protected Integer getBatteryVoltage()
       {
-      return brainLinkProxy.getBatteryVoltage();
+      return brainLink.getBatteryVoltage();
       }
 
    protected void setFullColorLED(final int r, final int g, final int b)
       {
-      brainLinkProxy.setFullColorLED(r, g, b);
+      brainLink.setFullColorLED(r, g, b);
       }
 
    protected void disconnect()
       {
-      if (brainLinkProxy != null)
+      if (brainLink != null)
          {
-         brainLinkProxy.disconnect();
-         brainLinkProxy = null;
+         brainLink.disconnect();
+         brainLink = null;
          }
       }
 
    protected boolean isInitialized()
       {
-      return brainLinkProxy != null;
+      return brainLink != null;
       }
    }
