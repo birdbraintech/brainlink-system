@@ -37,7 +37,7 @@ public final class BrainLinkProxy implements BrainLink
    private static final Logger LOG = Logger.getLogger(BrainLinkProxy.class);
 
    public static final String APPLICATION_NAME = "BrainLinkProxy";
-   private static final int DELAY_BETWEEN_PEER_PINGS = 2;
+   private static final int DELAY_IN_SECONDS_BETWEEN_PEER_PINGS = 10;
 
    /**
     * Tries to create a <code>BrainLinkProxy</code> for the the serial port specified by the given
@@ -114,8 +114,8 @@ public final class BrainLinkProxy implements BrainLink
 
       // schedule periodic peer pings
       peerPingScheduledFuture = peerPingScheduler.scheduleAtFixedRate(brainLinkPinger,
-                                                                      DELAY_BETWEEN_PEER_PINGS, // delay before first ping
-                                                                      DELAY_BETWEEN_PEER_PINGS, // delay between pings
+                                                                      DELAY_IN_SECONDS_BETWEEN_PEER_PINGS, // delay before first ping
+                                                                      DELAY_IN_SECONDS_BETWEEN_PEER_PINGS, // delay between pings
                                                                       TimeUnit.SECONDS);
       }
 

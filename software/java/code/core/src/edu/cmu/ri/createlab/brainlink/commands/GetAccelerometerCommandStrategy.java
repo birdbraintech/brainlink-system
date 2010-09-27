@@ -6,7 +6,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class GetAccelerometerCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetAccelerometerCommandStrategy extends ReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the value of the accelerometer. */
    private static final byte[] COMMAND = {'A'};

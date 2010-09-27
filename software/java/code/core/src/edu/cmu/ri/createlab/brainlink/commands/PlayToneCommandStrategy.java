@@ -7,7 +7,7 @@ import edu.cmu.ri.createlab.util.MathUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class PlayToneCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
+public final class PlayToneCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
    {
    /** The command character used to set the tone frequency. */
    private static final byte COMMAND_PREFIX = 'D';

@@ -6,7 +6,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class GetAnalogInputsCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetAnalogInputsCommandStrategy extends ReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the analog input values. */
    private static final byte[] COMMAND = {'X'};
