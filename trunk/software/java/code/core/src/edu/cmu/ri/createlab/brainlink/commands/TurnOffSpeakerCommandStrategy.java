@@ -5,7 +5,7 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class TurnOffSpeakerCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
+public final class TurnOffSpeakerCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
    {
    /** The command character used to turn off the speaker. */
    private static final byte[] COMMAND = {'d'};

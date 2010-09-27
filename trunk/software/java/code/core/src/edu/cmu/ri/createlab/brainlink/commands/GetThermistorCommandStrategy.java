@@ -6,7 +6,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class GetThermistorCommandStrategy extends ReturnValueCommandStrategy<Integer>
+public final class GetThermistorCommandStrategy extends ReturnValueCommandStrategy<Integer>
    {
    /** The command character used to request the value of the thermistor. */
    private static final byte[] COMMAND = {'T'};

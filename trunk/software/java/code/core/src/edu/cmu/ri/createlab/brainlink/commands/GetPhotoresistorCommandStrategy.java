@@ -6,7 +6,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public class GetPhotoresistorCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetPhotoresistorCommandStrategy extends ReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the value of the photoresistors. */
    private static final byte[] COMMAND = {'L'};
