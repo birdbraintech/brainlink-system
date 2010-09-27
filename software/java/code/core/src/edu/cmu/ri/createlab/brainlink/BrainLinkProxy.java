@@ -182,7 +182,16 @@ public final class BrainLinkProxy implements BrainLink
       */
 
       // shut down the command queue, which closes the serial port
-      commandQueue.shutdown();
+      try
+         {
+         LOG.debug("BrainLinkProxy.disconnect(): shutting down the SerialPortCommandExecutionQueue...");
+         commandQueue.shutdown();
+         LOG.debug("BrainLinkProxy.disconnect(): done shutting down the SerialPortCommandExecutionQueue");
+         }
+      catch (Exception e)
+         {
+         LOG.error("BrainLinkProxy.disconnect(): Exception while trying to shut down the SerialPortCommandExecutionQueue", e);
+         }
       }
 
    private class BrainLinkPinger implements Runnable
@@ -211,7 +220,7 @@ public final class BrainLinkProxy implements BrainLink
          {
          try
             {
-            LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Peer ping failed (received a null speed).  Attempting to disconnect...");
+            LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Peer ping failed.  Attempting to disconnect...");
             disconnect(false);
             LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Done disconnecting from the BrainLink");
             }
