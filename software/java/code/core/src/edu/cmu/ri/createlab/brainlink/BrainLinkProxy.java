@@ -7,8 +7,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import edu.cmu.ri.createlab.brainlink.commands.FullColorLEDCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandExecutionQueue;
@@ -90,7 +96,12 @@ public final class BrainLinkProxy implements BrainLink
    }
 
    private final SerialPortCommandExecutionQueue commandQueue;
+   private final NoReturnValueCommandExecutor noReturnValueCommandExecutor = new NoReturnValueCommandExecutor();
    private final ReturnValueCommandExecutor<Integer> getBatteryVoltageCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetBatteryVoltageCommandStrategy());
+   private final ReturnValueCommandExecutor<int[]> getAccelerometerStateCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAccelerometerCommandStrategy());
+   private final ReturnValueCommandExecutor<int[]> getPhotoresistorsCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetPhotoresistorCommandStrategy());
+   private final ReturnValueCommandExecutor<int[]> getAnalogInputsCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAnalogInputsCommandStrategy());
+   private final ReturnValueCommandExecutor<Integer> getThermistorCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetThermistorCommandStrategy());
 
    private final BrainLinkPinger brainLinkPinger = new BrainLinkPinger();
    private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLinkProxy.peerPingScheduler"));
@@ -136,8 +147,37 @@ public final class BrainLinkProxy implements BrainLink
 
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
-      final NoReturnValueCommandExecutor commandExecutor = new NoReturnValueCommandExecutor(new FullColorLEDCommandStrategy(red, green, blue));
-      return commandExecutor.executeAndReturnStatus();
+      return noReturnValueCommandExecutor.executeAndReturnStatus(new FullColorLEDCommandStrategy(red, green, blue));
+      }
+
+   public int[] getPhotoresistors()
+      {
+      return getPhotoresistorsCommandExecutor.execute();
+      }
+
+   public int[] getAccelerometerState()
+      {
+      return getAccelerometerStateCommandExecutor.execute();
+      }
+
+   public int[] getAnalogInputs()
+      {
+      return getAnalogInputsCommandExecutor.execute();
+      }
+
+   public Integer getThermistor()
+      {
+      return getThermistorCommandExecutor.execute();
+      }
+
+   public boolean playTone(final int frequency)
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(new PlayToneCommandStrategy(frequency));
+      }
+
+   public boolean turnOffSpeaker()
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(new TurnOffSpeakerCommandStrategy());
       }
 
    public void disconnect()
@@ -284,14 +324,7 @@ public final class BrainLinkProxy implements BrainLink
 
    private final class NoReturnValueCommandExecutor
       {
-      private final CreateLabSerialDeviceNoReturnValueCommandStrategy commandStrategy;
-
-      private NoReturnValueCommandExecutor(final CreateLabSerialDeviceNoReturnValueCommandStrategy commandStrategy)
-         {
-         this.commandStrategy = commandStrategy;
-         }
-
-      private boolean executeAndReturnStatus()
+      private boolean executeAndReturnStatus(final CreateLabSerialDeviceNoReturnValueCommandStrategy commandStrategy)
          {
          try
             {

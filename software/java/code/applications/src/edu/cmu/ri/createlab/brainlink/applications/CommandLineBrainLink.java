@@ -3,7 +3,6 @@ package edu.cmu.ri.createlab.brainlink.applications;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import edu.cmu.ri.createlab.brainlink.BaseCommandLineBrainLink;
-import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.BrainLinkProxy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 
@@ -19,7 +18,7 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
       new CommandLineBrainLink(in).run();
       }
 
-   private BrainLink brainLink;
+   private BrainLinkProxy brainLink;
 
    private CommandLineBrainLink(final BufferedReader in)
       {
@@ -51,6 +50,11 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
          }
       }
 
+   protected boolean isConnected()
+      {
+      return brainLink != null;
+      }
+
    protected Integer getBatteryVoltage()
       {
       return brainLink.getBatteryVoltage();
@@ -61,17 +65,42 @@ public final class CommandLineBrainLink extends BaseCommandLineBrainLink
       brainLink.setFullColorLED(r, g, b);
       }
 
+   protected int[] getAccelerometer()
+      {
+      return brainLink.getAccelerometerState();
+      }
+
+   protected int[] getPhotoresistors()
+      {
+      return brainLink.getPhotoresistors();
+      }
+
+   protected int[] getAnalogInputs()
+      {
+      return brainLink.getAnalogInputs();
+      }
+
+   protected Integer getThermistor()
+      {
+      return brainLink.getThermistor();
+      }
+
+   protected void playTone(final int frequency)
+      {
+      brainLink.playTone(frequency);
+      }
+
+   protected void turnOffSpeaker()
+      {
+      brainLink.turnOffSpeaker();
+      }
+
    protected void disconnect()
       {
-      if (brainLink != null)
+      if (isConnected())
          {
          brainLink.disconnect();
          brainLink = null;
          }
-      }
-
-   protected boolean isInitialized()
-      {
-      return brainLink != null;
       }
    }
