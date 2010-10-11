@@ -572,7 +572,7 @@ public class ScriptableRobosapien
                final String trimmedCommand = command.trim();
                if (trimmedCommand.length() > 0 && !trimmedCommand.startsWith(COMMENT_CHARACTER))
                   {
-                  // try to look up the command from the map
+                  // try to look up the command in the map
                   final RobosapienAction action = COMMAND_MAP.get(trimmedCommand);
 
                   // if the action is null, then it's either unknown or a number specifying the milliseconds to wait
@@ -584,6 +584,7 @@ public class ScriptableRobosapien
                         final Long sleepDurationMillis = Long.parseLong(trimmedCommand);
 
                         // sleep for the specified milliseconds (should check for user input during the sleep--see Finch sleep)
+                        System.out.println("Pausing for " + sleepDurationMillis + " ms");
                         if (sleep(in, sleepDurationMillis))
                            {
                            shouldQuit = true;
@@ -592,11 +593,12 @@ public class ScriptableRobosapien
                         }
                      catch (NumberFormatException e)
                         {
-                        System.err.println("NumberFormatException while trying to parse [" + trimmedCommand + "] as a number.  Ignoring it instead.");
+                        System.err.println("NumberFormatException while trying to parse [" + trimmedCommand + "] as a number.  Ignoring it.");
                         }
                      }
                   else
                      {
+                     System.out.println("Executing action: " + trimmedCommand);
                      action.execute(robosapien);
                      }
                   }
