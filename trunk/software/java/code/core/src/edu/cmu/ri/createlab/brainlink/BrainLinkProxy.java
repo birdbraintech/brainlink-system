@@ -1,5 +1,6 @@
 package edu.cmu.ri.createlab.brainlink;
 
+import java.awt.Color;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
@@ -12,8 +13,10 @@ import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
@@ -84,7 +87,7 @@ public final class BrainLinkProxy implements BrainLink
             }
 
          // TODO: do handshake?
-         return new BrainLinkProxy(commandQueue);
+         return new BrainLinkProxy(commandQueue, serialPortName);
          }
       }
    catch (Exception e)
@@ -96,6 +99,7 @@ public final class BrainLinkProxy implements BrainLink
    }
 
    private final SerialPortCommandExecutionQueue commandQueue;
+   private final String serialPortName;
    private final NoReturnValueCommandExecutor noReturnValueCommandExecutor = new NoReturnValueCommandExecutor();
    private final ReturnValueCommandExecutor<Integer> getBatteryVoltageCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetBatteryVoltageCommandStrategy());
    private final ReturnValueCommandExecutor<int[]> getAccelerometerStateCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAccelerometerCommandStrategy());
@@ -108,9 +112,10 @@ public final class BrainLinkProxy implements BrainLink
    private final ScheduledFuture<?> peerPingScheduledFuture;
    private final Collection<CreateLabDevicePingFailureEventListener> createLabDevicePingFailureEventListeners = new HashSet<CreateLabDevicePingFailureEventListener>();
 
-   private BrainLinkProxy(final SerialPortCommandExecutionQueue commandQueue)
+   private BrainLinkProxy(final SerialPortCommandExecutionQueue commandQueue, final String serialPortName)
       {
       this.commandQueue = commandQueue;
+      this.serialPortName = serialPortName;
 
       // schedule periodic peer pings
       peerPingScheduledFuture = peerPingScheduler.scheduleAtFixedRate(brainLinkPinger,
@@ -121,7 +126,7 @@ public final class BrainLinkProxy implements BrainLink
 
    public String getPortName()
       {
-      return null;
+      return serialPortName;
       }
 
    public void addCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
@@ -148,6 +153,11 @@ public final class BrainLinkProxy implements BrainLink
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
       return noReturnValueCommandExecutor.executeAndReturnStatus(new FullColorLEDCommandStrategy(red, green, blue));
+      }
+
+   public boolean setFullColorLED(final Color color)
+      {
+      return setFullColorLED(color.getRed(), color.getGreen(), color.getBlue());
       }
 
    public int[] getPhotoresistors()
@@ -178,6 +188,21 @@ public final class BrainLinkProxy implements BrainLink
    public boolean turnOffSpeaker()
       {
       return noReturnValueCommandExecutor.executeAndReturnStatus(new TurnOffSpeakerCommandStrategy());
+      }
+
+   public boolean initializeIR(final byte[] initializationBytes)
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(new InitializeIRCommandStrategy(initializationBytes));
+      }
+
+   public boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy)
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(commandStrategy);
+      }
+
+   public boolean sendSimpleIRCommand(final byte command)
+      {
+      return sendSimpleIRCommand(new SimpleIRCommandStrategy(command));
       }
 
    public void disconnect()

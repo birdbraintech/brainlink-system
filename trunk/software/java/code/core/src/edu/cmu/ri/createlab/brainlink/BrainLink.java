@@ -1,5 +1,7 @@
 package edu.cmu.ri.createlab.brainlink;
 
+import java.awt.Color;
+import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
 
 /**
@@ -9,7 +11,9 @@ public interface BrainLink extends CreateLabDeviceProxy
    {
    Integer getBatteryVoltage();
 
-   boolean setFullColorLED(int red, int green, int blue);
+   boolean setFullColorLED(final int red, final int green, final int blue);
+
+   boolean setFullColorLED(final Color color);
 
    int[] getPhotoresistors();
 
@@ -22,4 +26,10 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean playTone(final int frequency);
 
    boolean turnOffSpeaker();
+
+   boolean initializeIR(final byte[] initializationBytes);
+
+   boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy);
+
+   boolean sendSimpleIRCommand(final byte command);
    }
