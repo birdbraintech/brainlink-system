@@ -33,7 +33,7 @@ final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivity
 
             if (proxy == null)
                {
-               LOG.debug("BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): connection failed, returning null.");
+               LOG.debug("BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): connection failed, maybe it's not the device we're looking for?");
                }
             else
                {
