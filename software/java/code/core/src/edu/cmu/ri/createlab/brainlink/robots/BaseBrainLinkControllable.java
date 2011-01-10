@@ -35,19 +35,27 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
       LOG.debug("BaseBrainLinkControllable.BaseBrainLinkControllable(): processing user-defined serial port names...");
 
       // initialize the set of names to those specified in the argument to this constructor
-      final StringBuilder serialPortNames = new StringBuilder();
+      final StringBuilder serialPortNames = new StringBuilder(userDefinedSerialPortNames);
 
       // Now see if there are also serial ports already specified in the system property (e.g. via the -D command line switch).
       // If so, then those take precedence the ones specified in the constructor argument will be appended
       final String serialPortNamesAlreadyInSystemProperty = System.getProperty(SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY, null);
       if (serialPortNamesAlreadyInSystemProperty != null && serialPortNamesAlreadyInSystemProperty.trim().length() > 0)
          {
-         serialPortNames.append(serialPortNamesAlreadyInSystemProperty).append(',').append(userDefinedSerialPortNames);
+         if (LOG.isDebugEnabled())
+            {
+            LOG.debug("BaseBrainLinkControllable.BaseBrainLinkControllable(): Existing system property value = [" + serialPortNamesAlreadyInSystemProperty + "]");
+            }
+         serialPortNames.insert(0, ",");
+         serialPortNames.insert(0, serialPortNamesAlreadyInSystemProperty);
          }
 
       // now set the system property
       System.setProperty(SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY, serialPortNames.toString());
-      LOG.debug("BaseBrainLinkControllable.BaseBrainLinkControllable(): System property [" + SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY + "] set to [" + serialPortNames + "]");
+      if (LOG.isDebugEnabled())
+         {
+         LOG.debug("BaseBrainLinkControllable.BaseBrainLinkControllable(): System property [" + SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY + "] now set to [" + serialPortNames + "]");
+         }
       }
 
    System.out.println("Connecting to BrainLink...this may take a few seconds...");
