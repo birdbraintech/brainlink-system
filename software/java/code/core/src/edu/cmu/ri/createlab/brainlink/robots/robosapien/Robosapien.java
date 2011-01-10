@@ -14,6 +14,13 @@ public final class Robosapien extends BaseBrainLinkControllable
 
    public Robosapien()
       {
+      this(null);
+      }
+
+   public Robosapien(final String serialPortNames)
+      {
+      super(serialPortNames);
+
       final BrainLink brainLink = getBrainLink();
       if (brainLink != null)
          {

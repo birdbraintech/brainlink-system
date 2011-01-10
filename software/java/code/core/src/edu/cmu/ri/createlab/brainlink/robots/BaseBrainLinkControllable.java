@@ -23,6 +23,15 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
    private BrainLink brainLink = null;
 
    /**
+    * Creates the <code>BaseBrainLinkControllable</code> by attempting to connect to all available serial ports and
+    * connecting to the first BrainLink it finds.
+    */
+   public BaseBrainLinkControllable()
+   {
+   this(null);
+   }
+
+   /**
     * Creates the <code>BaseBrainLinkControllable</code> by attempting to connect to a BrainLink on the given serial
     * port(s).  Note that if one ore more serial ports is already specified as a system property (e.g. by using the -D
     * command line switch), then the serial port(s) specified in the argument to this constructor are appended to the
@@ -120,15 +129,6 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
       }
 
    LOG.trace("BrainLink.BrainLink(): 6) All done!");
-   }
-
-   /**
-    * Creates the <code>BaseBrainLinkControllable</code> by attempting to connect to all available serial ports and
-    * connecting to the first BrainLink it finds.
-    */
-   public BaseBrainLinkControllable()
-   {
-   this(null);
    }
 
    public final BrainLink getBrainLink()
