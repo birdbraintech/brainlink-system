@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
+import edu.cmu.ri.createlab.brainlink.robots.BrainLinkSolo;
 
 /**
  * <p>
@@ -20,7 +20,8 @@ public final class BrainLinkBlinkyLED
 
    public static void main(final String[] args)
       {
-      final NakedBrainLink brainLink = new NakedBrainLink();
+      final BrainLinkSolo brainLink = new BrainLinkSolo("/dev/tty.brainlink");
+      //final BrainLinkSolo brainLink = new BrainLinkSolo();
 
       System.out.println("");
       System.out.println("Press ENTER to quit.");
@@ -107,14 +108,5 @@ public final class BrainLinkBlinkyLED
          System.err.println("IOException while reading user input: " + e);
          }
       return false;
-      }
-
-   private static final class NakedBrainLink extends BaseBrainLinkControllable
-      {
-      @Override
-      protected void prepareForDisconnect()
-         {
-         // nothing to do
-         }
       }
    }
