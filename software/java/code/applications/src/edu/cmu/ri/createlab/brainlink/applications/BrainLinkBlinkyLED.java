@@ -20,8 +20,8 @@ public final class BrainLinkBlinkyLED
 
    public static void main(final String[] args)
       {
-      final BrainLinkSolo brainLink = new BrainLinkSolo("/dev/tty.brainlink");
-      //final BrainLinkSolo brainLink = new BrainLinkSolo();
+      //final BrainLinkSolo brainLink = new BrainLinkSolo("/dev/tty.brainlink");
+      final BrainLinkSolo brainLink = new BrainLinkSolo();
 
       System.out.println("");
       System.out.println("Press ENTER to quit.");
