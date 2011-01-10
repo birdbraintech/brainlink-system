@@ -18,8 +18,20 @@ final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivity
       {
       LOG.debug("BrainLinkConnectivityManager.scanForDeviceAndCreateProxy()");
 
-      // check each available serial port for the target serial device, and connect to the first one found
-      final SortedSet<String> availableSerialPorts = SerialPortEnumerator.getAvailableSerialPorts();
+      // If the user specified one or more serial ports, then just start trying to connect to it/them.  Otherwise,
+      // check each available serial port for the target serial device, and connect to the first one found.  This
+      // makes connection time much faster for when you know the name of the serial port.
+      final SortedSet<String> availableSerialPorts;
+      if (SerialPortEnumerator.didUserDefineSetOfSerialPorts())
+         {
+         availableSerialPorts = SerialPortEnumerator.getSerialPorts();
+         }
+      else
+         {
+         availableSerialPorts = SerialPortEnumerator.getAvailableSerialPorts();
+         }
+
+      // try the serial ports
       if ((availableSerialPorts != null) && (!availableSerialPorts.isEmpty()))
          {
          for (final String portName : availableSerialPorts)
