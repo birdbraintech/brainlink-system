@@ -13,6 +13,7 @@ import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
@@ -86,8 +87,24 @@ public final class BrainLinkProxy implements BrainLink
             LOG.debug("Serial port '" + serialPortName + "' opened.");
             }
 
-         // TODO: do handshake?
-         return new BrainLinkProxy(commandQueue, serialPortName);
+         // now try to do the handshake with the BrainLink to establish communication
+         final boolean wasHandshakeSuccessful = commandQueue.executeAndReturnStatus(new HandshakeCommandStrategy());
+
+         // see if the handshake was a success
+         if (wasHandshakeSuccessful)
+            {
+            LOG.info("BrainLink handshake successful!");
+
+            // now create and return the proxy
+            return new BrainLinkProxy(commandQueue, serialPortName);
+            }
+         else
+            {
+            LOG.error("Failed to handshake with BrainLink");
+            }
+
+         // the handshake failed, so shutdown the command queue to release the serial port
+         commandQueue.shutdown();
          }
       }
    catch (Exception e)
