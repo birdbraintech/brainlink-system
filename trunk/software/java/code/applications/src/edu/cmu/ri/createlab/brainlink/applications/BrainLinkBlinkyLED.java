@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.robots.BrainLinkSolo;
 
 /**
@@ -17,36 +18,39 @@ import edu.cmu.ri.createlab.brainlink.robots.BrainLinkSolo;
 public final class BrainLinkBlinkyLED
    {
    private static final int SLEEP_INCREMENT_MILLIS = 50;
+   private static final Color[] COLORS = new Color[]{Color.RED, Color.GREEN, Color.BLUE};
 
    public static void main(final String[] args)
       {
-      //final BrainLinkSolo brainLink = new BrainLinkSolo("/dev/tty.brainlink");
-      final BrainLinkSolo brainLink = new BrainLinkSolo();
+      //final BrainLinkSolo brainLinkSolo = new BrainLinkSolo("/dev/tty.brainlink");
+      final BrainLinkSolo brainLinkSolo = new BrainLinkSolo();
 
       System.out.println("");
       System.out.println("Press ENTER to quit.");
 
       final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      int colorIndex = 0;
       while (true)
          {
-         brainLink.getBrainLink().setFullColorLED(Color.RED);
-         if (sleep(in, 100))
+         final BrainLink brainLink = brainLinkSolo.getBrainLink();
+         if (brainLink != null)
             {
-            break;
+            brainLink.setFullColorLED(COLORS[colorIndex]);
+            if (sleep(in, 100))
+               {
+               break;
+               }
+
+            colorIndex = (colorIndex >= COLORS.length - 1) ? 0 : colorIndex + 1;
             }
-         brainLink.getBrainLink().setFullColorLED(Color.GREEN);
-         if (sleep(in, 100))
+         else
             {
-            break;
-            }
-         brainLink.getBrainLink().setFullColorLED(Color.BLUE);
-         if (sleep(in, 100))
-            {
+            System.out.println("BrainLink is null...aborting.");
             break;
             }
          }
 
-      brainLink.disconnect();
+      brainLinkSolo.disconnect();
       }
 
    private BrainLinkBlinkyLED()
