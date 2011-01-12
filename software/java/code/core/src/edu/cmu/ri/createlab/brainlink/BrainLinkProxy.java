@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import edu.cmu.ri.createlab.brainlink.commands.DisconnectCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.FullColorLEDCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
@@ -117,6 +118,7 @@ public final class BrainLinkProxy implements BrainLink
 
    private final SerialPortCommandExecutionQueue commandQueue;
    private final String serialPortName;
+   private final DisconnectCommandStrategy disconnectCommandStrategy = new DisconnectCommandStrategy();
    private final NoReturnValueCommandExecutor noReturnValueCommandExecutor = new NoReturnValueCommandExecutor();
    private final ReturnValueCommandExecutor<Integer> getBatteryVoltageCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetBatteryVoltageCommandStrategy());
    private final ReturnValueCommandExecutor<int[]> getAccelerometerStateCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAccelerometerCommandStrategy());
@@ -247,21 +249,25 @@ public final class BrainLinkProxy implements BrainLink
          }
 
       // optionally send goodbye command to the BrainLink
-      /*
-      // TODO: implement this if Tom adds a disconnect command
       if (willAddDisconnectCommandToQueue)
          {
          LOG.debug("BrainLinkProxy.disconnect(): Now attempting to send the disconnect command to the BrainLink");
-         if (commandQueue.executeAndReturnStatus(disconnectCommandStrategy))
+         try
             {
-            LOG.debug("BrainLinkProxy.disconnect(): Successfully disconnected from the BrainLink.");
+            if (commandQueue.executeAndReturnStatus(disconnectCommandStrategy))
+               {
+               LOG.debug("BrainLinkProxy.disconnect(): Successfully disconnected from the BrainLink.");
+               }
+            else
+               {
+               LOG.error("BrainLinkProxy.disconnect(): Failed to disconnect from the BrainLink.");
+               }
             }
-         else
+         catch (Exception e)
             {
-            LOG.error("BrainLinkProxy.disconnect(): Failed to disconnect from the BrainLink.");
+            LOG.error("Exception caught while trying to execute the disconnect", e);
             }
          }
-      */
 
       // shut down the command queue, which closes the serial port
       try
