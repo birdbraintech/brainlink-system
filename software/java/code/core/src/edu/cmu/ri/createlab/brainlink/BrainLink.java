@@ -1,6 +1,8 @@
 package edu.cmu.ri.createlab.brainlink;
 
 import java.awt.Color;
+
+import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
 
@@ -21,6 +23,18 @@ public interface BrainLink extends CreateLabDeviceProxy
 
    int[] getAnalogInputs();
 
+   Integer getAnalogInput(int port);
+
+   Integer getLeftLightSensor();
+
+   Integer getRightLightSensor();
+
+   Double getXAccelerometer();
+
+   Double getYAccelerometer();
+
+   Double getZAccelerometer();
+
    Integer getThermistor();
 
    boolean playTone(final int frequency);
@@ -34,4 +48,6 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean sendSimpleIRCommand(final byte command);
 
    boolean turnOffIR();
+
+   boolean sendIRCommand(final IRCommandStrategy commandStrategy);
    }
