@@ -92,7 +92,8 @@ public final class wallE extends BaseBrainLinkControllable
 
    public boolean stop()
       {
-      return false;
+      final BrainLink brainLink = getBrainLink();
+      return brainLink != null && brainLink.turnOffIR();
       }
 
    private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)

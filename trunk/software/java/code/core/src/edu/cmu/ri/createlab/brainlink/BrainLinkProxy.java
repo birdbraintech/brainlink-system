@@ -7,20 +7,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import edu.cmu.ri.createlab.brainlink.commands.DisconnectCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.FullColorLEDCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
+
+import edu.cmu.ri.createlab.brainlink.commands.*;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandExecutionQueue;
@@ -182,13 +170,14 @@ public final class BrainLinkProxy implements BrainLink
       return setFullColorLED(color.getRed(), color.getGreen(), color.getBlue());
       }
 
-   public int[] getPhotoresistors()
+   public int[] getLightSensors()
       {
       return getPhotoresistorsCommandExecutor.execute();
       }
 
-   public int[] getAccelerometerState()
+   public double[] getAccelerometerState()
       {
+          double[] states;
       return getAccelerometerStateCommandExecutor.execute();
       }
 
@@ -197,6 +186,72 @@ public final class BrainLinkProxy implements BrainLink
       return getAnalogInputsCommandExecutor.execute();
       }
 
+   public Integer getAnalogInput(int port)
+      {
+          int[] inputs = getAnalogInputs();
+          if(inputs != null) {
+              return inputs[port];
+          }
+          else {
+              return null;
+          }
+      }
+
+   public Integer getLeftLightSensor()
+      {
+          int[] inputs = getLightSensors();
+          if(inputs != null) {
+              return inputs[0];
+          }
+          else {
+              return null;
+          }
+      }
+
+   public Integer getRightLightSensor()
+      {
+          int[] inputs = getLightSensors();
+          if(inputs != null) {
+              return inputs[1];
+          }
+          else {
+              return null;
+          }
+      }
+
+   public Double getXAccelerometer()
+   {
+       double[] inputs = getAccelerometerState();
+       if(inputs != null) {
+           return inputs[0];
+       }
+       else {
+           return null;
+       }
+   }
+
+
+   public Double getYAccelerometer()
+   {
+       double[] inputs = getAccelerometerState();
+       if(inputs != null) {
+           return inputs[1];
+       }
+       else {
+           return null;
+       }
+   }
+
+   public Double getZAccelerometer()
+   {
+       double[] inputs = getAccelerometerState();
+       if(inputs != null) {
+           return inputs[2];
+       }
+       else {
+           return null;
+       }
+   }
    public Integer getThermistor()
       {
       return getThermistorCommandExecutor.execute();
@@ -232,6 +287,11 @@ public final class BrainLinkProxy implements BrainLink
       return noReturnValueCommandExecutor.executeAndReturnStatus(turnOffIRCommandStrategy);
       }
 
+   public boolean sendIRCommand(final IRCommandStrategy commandStrategy)
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(commandStrategy);
+      }
+       
    public void disconnect()
       {
       disconnect(true);
