@@ -32,4 +32,6 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy);
 
    boolean sendSimpleIRCommand(final byte command);
+
+   boolean turnOffIR();
    }
