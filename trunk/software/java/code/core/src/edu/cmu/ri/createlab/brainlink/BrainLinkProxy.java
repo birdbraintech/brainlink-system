@@ -19,6 +19,7 @@ import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
@@ -118,7 +119,9 @@ public final class BrainLinkProxy implements BrainLink
 
    private final SerialPortCommandExecutionQueue commandQueue;
    private final String serialPortName;
-   private final DisconnectCommandStrategy disconnectCommandStrategy = new DisconnectCommandStrategy();
+   private final CreateLabSerialDeviceNoReturnValueCommandStrategy disconnectCommandStrategy = new DisconnectCommandStrategy();
+   private final CreateLabSerialDeviceNoReturnValueCommandStrategy turnOffSpeakerCommandStrategy = new TurnOffSpeakerCommandStrategy();
+   private final CreateLabSerialDeviceNoReturnValueCommandStrategy turnOffIRCommandStrategy = new TurnOffIRCommandStrategy();
    private final NoReturnValueCommandExecutor noReturnValueCommandExecutor = new NoReturnValueCommandExecutor();
    private final ReturnValueCommandExecutor<Integer> getBatteryVoltageCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetBatteryVoltageCommandStrategy());
    private final ReturnValueCommandExecutor<int[]> getAccelerometerStateCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAccelerometerCommandStrategy());
@@ -206,7 +209,7 @@ public final class BrainLinkProxy implements BrainLink
 
    public boolean turnOffSpeaker()
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(new TurnOffSpeakerCommandStrategy());
+      return noReturnValueCommandExecutor.executeAndReturnStatus(turnOffSpeakerCommandStrategy);
       }
 
    public boolean initializeIR(final byte[] initializationBytes)
@@ -222,6 +225,11 @@ public final class BrainLinkProxy implements BrainLink
    public boolean sendSimpleIRCommand(final byte command)
       {
       return sendSimpleIRCommand(new SimpleIRCommandStrategy(command));
+      }
+
+   public boolean turnOffIR()
+      {
+      return noReturnValueCommandExecutor.executeAndReturnStatus(turnOffIRCommandStrategy);
       }
 
    public void disconnect()

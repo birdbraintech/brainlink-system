@@ -331,6 +331,22 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
             }
          };
 
+   private final Runnable turnOffIRAction =
+         new Runnable()
+         {
+         public void run()
+            {
+            if (isConnected())
+               {
+               brainLink.turnOffIR();
+               }
+            else
+               {
+               println("You must be connected to the BrainLink first.");
+               }
+            }
+         };
+
    private final Runnable quitAction =
          new Runnable()
          {
@@ -357,6 +373,7 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       registerAction("H", pollingGetThermistorStateAction);
       registerAction("t", playToneAction);
       registerAction("s", turnOffSpeakerAction);
+      registerAction("i", turnOffIRAction);
 
       registerAction(QUIT_COMMAND, quitAction);
       }
@@ -382,6 +399,7 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       println("");
       println("t         Play a tone through the BrainLink's speaker");
       println("s         Turn off the speaker");
+      println("i         Turn off IR");
       println("");
       println("q         Quit");
       println("");
