@@ -7,8 +7,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
-import edu.cmu.ri.createlab.brainlink.commands.*;
+import edu.cmu.ri.createlab.brainlink.commands.DisconnectCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.FullColorLEDCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandExecutionQueue;
@@ -175,9 +188,81 @@ public final class BrainLinkProxy implements BrainLink
       return getPhotoresistorsCommandExecutor.execute();
       }
 
-   public double[] getAccelerometerState()
+   public double[] getAccelerometerValuesInGs()
       {
-          double[] states;
+      final int[] rawValues = getRawAccelerometerState();
+      if (rawValues != null)
+         {
+         return AccelerometerUnitConverterFreescaleMMA7660FC.getInstance().convert(rawValues);
+         }
+      return null;
+      }
+
+   public Double getXAccelerometer()
+      {
+      return getAccelerometerAxisValue(0);
+      }
+
+   public Double getYAccelerometer()
+      {
+      return getAccelerometerAxisValue(1);
+      }
+
+   public Double getZAccelerometer()
+      {
+      return getAccelerometerAxisValue(2);
+      }
+
+   private Double getAccelerometerAxisValue(final int axisIndex)
+      {
+      if (0 <= axisIndex && axisIndex < BrainLinkConstants.ACCELEROMETER_AXIS_COUNT)
+         {
+         final double[] values = getAccelerometerValuesInGs();
+         if (values != null)
+            {
+            return values[axisIndex];
+            }
+         }
+      return null;
+      }
+
+   public Boolean wasShaken()
+      {
+      final int[] rawValues = getRawAccelerometerState();
+      if (rawValues != null)
+         {
+         final int tapShake = rawValues[3];
+         return (tapShake & 128) == 128;     // apply mask to get the shaken state
+         }
+      return false;
+      }
+
+   public Boolean wasTapped()
+      {
+      final int[] rawValues = getRawAccelerometerState();
+      if (rawValues != null)
+         {
+         final int tapShake = rawValues[3];
+         return (tapShake & 32) == 32;     // apply mask to get the tap state
+         }
+      return false;
+      }
+
+   public Boolean wasShakenOTapped()
+      {
+      final int[] rawValues = getRawAccelerometerState();
+      if (rawValues != null)
+         {
+         final int tapShake = rawValues[3];
+         final boolean wasTapped = (tapShake & 32) == 32;
+         final boolean wasShaken = (tapShake & 128) == 128;
+         return wasTapped || wasShaken;
+         }
+      return false;
+      }
+
+   private int[] getRawAccelerometerState()
+      {
       return getAccelerometerStateCommandExecutor.execute();
       }
 
@@ -186,72 +271,42 @@ public final class BrainLinkProxy implements BrainLink
       return getAnalogInputsCommandExecutor.execute();
       }
 
-   public Integer getAnalogInput(int port)
+   public Integer getAnalogInput(final int port)
       {
-          int[] inputs = getAnalogInputs();
-          if(inputs != null) {
-              return inputs[port];
-          }
-          else {
-              return null;
-          }
+      if (0 <= port && port < BrainLinkConstants.ANALOG_INPUT_COUNT)
+         {
+         final int[] inputs = getAnalogInputs();
+         if (inputs != null)
+            {
+            return inputs[port];
+            }
+         }
+      return null;
       }
 
    public Integer getLeftLightSensor()
       {
-          int[] inputs = getLightSensors();
-          if(inputs != null) {
-              return inputs[0];
-          }
-          else {
-              return null;
-          }
+      return getLightSensorValue(0);
       }
 
    public Integer getRightLightSensor()
       {
-          int[] inputs = getLightSensors();
-          if(inputs != null) {
-              return inputs[1];
-          }
-          else {
-              return null;
-          }
+      return getLightSensorValue(1);
       }
 
-   public Double getXAccelerometer()
-   {
-       double[] inputs = getAccelerometerState();
-       if(inputs != null) {
-           return inputs[0];
-       }
-       else {
-           return null;
-       }
-   }
+   private Integer getLightSensorValue(final int i)
+      {
+      if (0 <= i && i < BrainLinkConstants.PHOTORESISTOR_DEVICE_COUNT)
+         {
+         final int[] inputs = getLightSensors();
+         if (inputs != null)
+            {
+            return inputs[i];
+            }
+         }
+      return null;
+      }
 
-
-   public Double getYAccelerometer()
-   {
-       double[] inputs = getAccelerometerState();
-       if(inputs != null) {
-           return inputs[1];
-       }
-       else {
-           return null;
-       }
-   }
-
-   public Double getZAccelerometer()
-   {
-       double[] inputs = getAccelerometerState();
-       if(inputs != null) {
-           return inputs[2];
-       }
-       else {
-           return null;
-       }
-   }
    public Integer getThermistor()
       {
       return getThermistorCommandExecutor.execute();
@@ -291,7 +346,7 @@ public final class BrainLinkProxy implements BrainLink
       {
       return noReturnValueCommandExecutor.executeAndReturnStatus(commandStrategy);
       }
-       
+
    public void disconnect()
       {
       disconnect(true);

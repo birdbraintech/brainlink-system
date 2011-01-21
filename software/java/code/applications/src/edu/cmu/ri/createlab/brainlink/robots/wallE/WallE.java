@@ -1,0 +1,114 @@
+package edu.cmu.ri.createlab.brainlink.robots.wallE;
+
+import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
+import org.apache.log4j.Logger;
+
+/**
+ * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
+ */
+public final class WallE extends BaseBrainLinkControllable
+   {
+   private static final Logger LOG = Logger.getLogger(WallE.class);
+
+   public WallE()
+      {
+      this(null);
+      }
+
+   public WallE(final String serialPortNames)
+      {
+      super(serialPortNames);
+
+      final BrainLink brainLink = getBrainLink();
+      if (brainLink != null)
+         {
+         LOG.debug("WALL-E.WallE(): initializing IR for WALL-E");
+         brainLink.initializeIR(WallEConstants.getInitializationCommand());
+         }
+      }
+
+   public boolean turnLeft()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.TURN_LEFT_COMMAND_STRATEGY);
+      }
+
+   public boolean driveForward()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.DRIVE_FORWARD_COMMAND_STRATEGY);
+      }
+
+   public boolean smallLeftTurn()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.SMALL_LEFT_TURN_COMMAND_STRATEGY);
+      }
+
+   public boolean mediumLeftTurn()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.MEDIUM_LEFT_TURN_COMMAND_STRATEGY);
+      }
+
+   public boolean largeLeftTurn()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.LARGE_LEFT_TURN_COMMAND_STRATEGY);
+      }
+
+   public boolean butterfly()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.BUTTERFLY_COMMAND_STRATEGY);
+      }
+
+   public boolean music()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.MUSIC_COMMAND_STRATEGY);
+      }
+
+   public boolean sun()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.SUN_COMMAND_STRATEGY);
+      }
+
+   public boolean specialTurn()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.SPECIAL_TURN_COMMAND_STRATEGY);
+      }
+
+   public boolean talkCloud()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.TALK_CLOUD_COMMAND_STRATEGY);
+      }
+
+   public boolean goStop()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.GO_STOP_COMMAND_STRATEGY);
+      }
+
+   public boolean box()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.BOX_COMMAND_STRATEGY);
+      }
+
+   public boolean prog()
+      {
+      return executeCommandStrategy(WallEConstants.CommandStrategies.PROG_COMMAND_STRATEGY);
+      }
+
+   public boolean stop()
+      {
+      final BrainLink brainLink = getBrainLink();
+      return brainLink != null && brainLink.turnOffIR();
+      }
+
+   private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
+      {
+      final BrainLink brainLink = getBrainLink();
+      return brainLink != null && brainLink.sendIRCommand(stopCommandStrategy);
+      }
+
+   protected void prepareForDisconnect()
+      {
+      stop();
+      }
+   }
