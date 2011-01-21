@@ -6,8 +6,8 @@ import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
 import org.apache.log4j.Logger;
 
 /**
- * @author Chris Bartley (bartley@cmu.edu)
  * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
  */
 public final class Prime8 extends BaseBrainLinkControllable
    {
@@ -99,7 +99,6 @@ public final class Prime8 extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(Prime8Constants.CommandStrategies.ANIMATION_COMMAND_STRATEGY);
       }
-
 
    private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
       {

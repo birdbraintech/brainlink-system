@@ -6,8 +6,8 @@ import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
 import org.apache.log4j.Logger;
 
 /**
- * @author Chris Bartley (bartley@cmu.edu)
  * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
  */
 public final class Roomba extends BaseBrainLinkControllable
    {
@@ -54,19 +54,23 @@ public final class Roomba extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(RoombaConstants.CommandStrategies.MAX_COMMAND_STRATEGY);
       }
-  public boolean spot()
+
+   public boolean spot()
       {
       return executeCommandStrategy(RoombaConstants.CommandStrategies.SPOT_COMMAND_STRATEGY);
       }
-  public boolean powerOff()
+
+   public boolean powerOff()
       {
       return executeCommandStrategy(RoombaConstants.CommandStrategies.POWER_OFF_COMMAND_STRATEGY);
       }
-  public boolean dock()
+
+   public boolean dock()
       {
       return executeCommandStrategy(RoombaConstants.CommandStrategies.DOCK_COMMAND_STRATEGY);
       }
-  public boolean stop()
+
+   public boolean stop()
       {
       return executeCommandStrategy(RoombaConstants.CommandStrategies.STOP_COMMAND_STRATEGY);
       }

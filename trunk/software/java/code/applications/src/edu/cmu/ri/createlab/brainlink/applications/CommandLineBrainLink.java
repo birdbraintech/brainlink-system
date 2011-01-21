@@ -214,6 +214,54 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
             }
          };
 
+   private final Runnable getWasShakenAction =
+         new Runnable()
+         {
+         public void run()
+            {
+            if (isConnected())
+               {
+               println(getWasShakenAsString());
+               }
+            else
+               {
+               println("You must be connected to the BrainLink first.");
+               }
+            }
+         };
+
+   private final Runnable getWasTappedAction =
+         new Runnable()
+         {
+         public void run()
+            {
+            if (isConnected())
+               {
+               println(getWasTappedAsString());
+               }
+            else
+               {
+               println("You must be connected to the BrainLink first.");
+               }
+            }
+         };
+
+   private final Runnable getWasShakenOrTappedAction =
+         new Runnable()
+         {
+         public void run()
+            {
+            if (isConnected())
+               {
+               println(getWasShakenOrTappedAsString());
+               }
+            else
+               {
+               println("You must be connected to the BrainLink first.");
+               }
+            }
+         };
+
    private final Runnable pollingGetAccelerometerStateAction =
          new Runnable()
          {
@@ -365,6 +413,11 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       registerAction("b", getBatteryVoltageAction);
       registerAction("f", setFullColorLEDAction);
       registerAction("a", getAccelerometerStateAction);
+
+      registerAction("S", getWasShakenAction);
+      registerAction("T", getWasTappedAction);
+      registerAction("U", getWasShakenOrTappedAction);
+
       registerAction("A", pollingGetAccelerometerStateAction);
       registerAction("l", getPhotoresistorStateAction);
       registerAction("L", pollingGetPhotoresistorStateAction);
@@ -391,6 +444,9 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       println("f         Control the full-color LED");
       println("a         Get the accelerometer state");
       println("A         Continuously poll the accelerometer for 30 seconds");
+      println("S         Returns whether the BrainLink was shaken since last accelerometer read");
+      println("T         Returns whether the BrainLink was tapped since last accelerometer read");
+      println("U         Returns whether the BrainLink was shaken or tapped since last accelerometer read");
       println("l         Get the state of the photoresistors");
       println("L         Continuously poll the photoresistors for 30 seconds");
       println("n         Get the analog input values");
@@ -423,9 +479,39 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
          }
       }
 
+   private String getWasShakenAsString()
+      {
+      final Boolean wasShaken = brainLink.wasShaken();
+      if (wasShaken != null)
+         {
+         return "Was shaken: " + wasShaken;
+         }
+      return "Accelerometer: failed to read value";
+      }
+
+   private String getWasTappedAsString()
+      {
+      final Boolean wasTapped = brainLink.wasTapped();
+      if (wasTapped != null)
+         {
+         return "Was tapped: " + wasTapped;
+         }
+      return "Accelerometer: failed to read value";
+      }
+
+   private String getWasShakenOrTappedAsString()
+      {
+      final Boolean wasShakenOrTapped = brainLink.wasShakenOTapped();
+      if (wasShakenOrTapped != null)
+         {
+         return "Was shaken or tapped: " + wasShakenOrTapped;
+         }
+      return "Accelerometer: failed to read value";
+      }
+
    private String convertAccelerometerStateToString()
       {
-      final int[] accelerometer = brainLink.getAccelerometerState();
+      final double[] accelerometer = brainLink.getAccelerometerValuesInGs();
       if (accelerometer != null)
          {
          return "Accelerometer: " + ArrayUtils.arrayToString(accelerometer);
@@ -436,7 +522,7 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
 
    private String convertPhotoresistorStateToString()
       {
-      final int[] photoresistors = brainLink.getPhotoresistors();
+      final int[] photoresistors = brainLink.getLightSensors();
       if (photoresistors != null)
          {
          return "Photoresistors: " + ArrayUtils.arrayToString(photoresistors);

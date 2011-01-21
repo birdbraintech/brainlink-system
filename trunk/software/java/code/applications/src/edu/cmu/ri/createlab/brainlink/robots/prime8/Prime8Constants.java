@@ -4,8 +4,8 @@ import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
- * @author Chris Bartley (bartley@cmu.edu)
  * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
  */
 final class Prime8Constants
    {
@@ -43,9 +43,9 @@ final class Prime8Constants
       {
       static final IRCommandStrategy WALK_FORWARD_COMMAND_STRATEGY = new IRCommandStrategy(Commands.WALK_FORWARD, (byte)0xC3, (byte)0x50);
       static final IRCommandStrategy WALK_BACKWARD_COMMAND_STRATEGY = new IRCommandStrategy(Commands.WALK_BACKWARD, (byte)0xC3, (byte)0x50);
-      static final IRCommandStrategy STOP_COMMAND_STRATEGY = new IRCommandStrategy(Commands.STOP,(byte)0x00, (byte)0x00);
+      static final IRCommandStrategy STOP_COMMAND_STRATEGY = new IRCommandStrategy(Commands.STOP, (byte)0x00, (byte)0x00);
       static final IRCommandStrategy TURN_LEFT_COMMAND_STRATEGY = new IRCommandStrategy(Commands.TURN_LEFT, (byte)0xC3, (byte)0x50);
-      static final IRCommandStrategy TURN_RIGHT_COMMAND_STRATEGY = new IRCommandStrategy(Commands.TURN_RIGHT,(byte)0xC3, (byte)0x50);
+      static final IRCommandStrategy TURN_RIGHT_COMMAND_STRATEGY = new IRCommandStrategy(Commands.TURN_RIGHT, (byte)0xC3, (byte)0x50);
       static final IRCommandStrategy STAND_UP_COMMAND_STRATEGY = new IRCommandStrategy(Commands.STAND_UP, (byte)0xC3, (byte)0x50);
       static final IRCommandStrategy SIT_DOWN_COMMAND_STRATEGY = new IRCommandStrategy(Commands.SIT_DOWN, (byte)0xC3, (byte)0x50);
       static final IRCommandStrategy GROWL_COMMAND_STRATEGY = new IRCommandStrategy(Commands.GROWL, (byte)0x00, (byte)0x00);

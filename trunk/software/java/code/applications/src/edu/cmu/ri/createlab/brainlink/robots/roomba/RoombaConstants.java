@@ -4,8 +4,8 @@ import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
- * @author Chris Bartley (bartley@cmu.edu)
  * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
  */
 final class RoombaConstants
    {
@@ -19,15 +19,15 @@ final class RoombaConstants
    private static final class Commands
       {
 
-      private static final byte[] DRIVE_FORWARD =   new byte[]{ByteUtils.intToUnsignedByte(0x82)};
-      private static final byte[] TURN_LEFT =   new byte[]{ByteUtils.intToUnsignedByte(0x81)};
-      private static final byte[] TURN_RIGHT =   new byte[]{ByteUtils.intToUnsignedByte(0x83)};
-      private static final byte[] CLEAN =   new byte[]{ByteUtils.intToUnsignedByte(0x88)};
-      private static final byte[] MAX =   new byte[]{ByteUtils.intToUnsignedByte(0x85)};
-      private static final byte[] STOP =   new byte[]{ByteUtils.intToUnsignedByte(0x89)};
-      private static final byte[] POWER_OFF =   new byte[]{ByteUtils.intToUnsignedByte(0x8A)};
-      private static final byte[] SPOT =   new byte[]{ByteUtils.intToUnsignedByte(0x84)};
-      private static final byte[] DOCK =   new byte[]{ByteUtils.intToUnsignedByte(0xF0)};          // UNTESTED
+      private static final byte[] DRIVE_FORWARD = new byte[]{ByteUtils.intToUnsignedByte(0x82)};
+      private static final byte[] TURN_LEFT = new byte[]{ByteUtils.intToUnsignedByte(0x81)};
+      private static final byte[] TURN_RIGHT = new byte[]{ByteUtils.intToUnsignedByte(0x83)};
+      private static final byte[] CLEAN = new byte[]{ByteUtils.intToUnsignedByte(0x88)};
+      private static final byte[] MAX = new byte[]{ByteUtils.intToUnsignedByte(0x85)};
+      private static final byte[] STOP = new byte[]{ByteUtils.intToUnsignedByte(0x89)};
+      private static final byte[] POWER_OFF = new byte[]{ByteUtils.intToUnsignedByte(0x8A)};
+      private static final byte[] SPOT = new byte[]{ByteUtils.intToUnsignedByte(0x84)};
+      private static final byte[] DOCK = new byte[]{ByteUtils.intToUnsignedByte(0xF0)};          // UNTESTED
 
       private Commands()
          {
