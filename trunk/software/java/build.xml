@@ -147,11 +147,18 @@
       <mkdir dir="${zip.dir}"/>
 
       <!-- Create the big honkin' jar containing all the jars from dist-brainlink-applications and the log4j.xml file for
-      file logging. -->
+      file logging. Note that we DON'T include the compiled version of the applications module since we include that as
+      source instead (see below) -->
       <jar destfile="${brainlink.jar}" update="yes" compress="true">
          <zipfileset dir="${resources.logging.dir}/file" includes="**/*"/>
-         <zipgroupfileset dir="${brainlink-applications.dist.dir}" includes="**/*.jar" excludes="${brainlink-applications-resources-jar.filename}"/>
+         <zipgroupfileset dir="${brainlink-applications.dist.dir}" includes="**/*.jar" excludes="${brainlink-applications-resources-jar.filename},${brainlink-applications.jar.filename}"/>
       </jar>
+
+      <!-- copy the application module's source code -->
+      <mkdir dir="${zip.dir}/src"/>
+      <copy todir="${zip.dir}/src" flatten="fae">
+         <fileset dir="${brainlink-applications.src.dir}" includes="**/*.java"/>
+      </copy>
 
       <!-- create javadocs -->
       <javadoc packagenames="*"
