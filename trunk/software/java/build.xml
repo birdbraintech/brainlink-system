@@ -195,7 +195,7 @@
       </zip>
 
       <!-- delete the temporary zip directory -->
-      <!--<delete dir="${zip.dir}"/>-->
+      <delete dir="${zip.dir}"/>
 
       <property name="create-distro-zip-is-complete" value="true"/>
    </target>
