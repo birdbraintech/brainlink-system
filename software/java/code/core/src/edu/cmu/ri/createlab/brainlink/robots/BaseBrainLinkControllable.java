@@ -47,7 +47,7 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
          final StringBuilder serialPortNames = new StringBuilder(userDefinedSerialPortNames);
 
          // Now see if there are also serial ports already specified in the system property (e.g. via the -D command line switch).
-         // If so, then those take precedence the ones specified in the constructor argument will be appended
+         // If so, then those take precedence and the ones specified in the constructor argument will be appended
          final String serialPortNamesAlreadyInSystemProperty = System.getProperty(SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY, null);
          if (serialPortNamesAlreadyInSystemProperty != null && serialPortNamesAlreadyInSystemProperty.trim().length() > 0)
             {
@@ -55,7 +55,7 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
                {
                LOG.debug("BaseBrainLinkControllable.BaseBrainLinkControllable(): Existing system property value = [" + serialPortNamesAlreadyInSystemProperty + "]");
                }
-            serialPortNames.insert(0, ",");
+            serialPortNames.insert(0, System.getProperty("path.separator", ":"));
             serialPortNames.insert(0, serialPortNamesAlreadyInSystemProperty);
             }
 
