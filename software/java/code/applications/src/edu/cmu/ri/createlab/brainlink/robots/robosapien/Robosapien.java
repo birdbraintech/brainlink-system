@@ -17,6 +17,10 @@ public final class Robosapien extends BaseBrainLinkControllable
       this(null);
       }
 
+       /**  Instantiates a Robosapien class
+        *
+        * @param serialPortNames The serial port identified of the Brainlink connected to this computer
+        */
    public Robosapien(final String serialPortNames)
       {
       super(serialPortNames);
