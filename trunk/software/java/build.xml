@@ -156,8 +156,17 @@
 
       <!-- copy the application module's source code -->
       <mkdir dir="${zip.dir}/src"/>
-      <copy todir="${zip.dir}/src" flatten="fae">
+      <copy todir="${zip.dir}/src" flatten="false">
          <fileset dir="${brainlink-applications.src.dir}" includes="**/*.java"/>
+      </copy>
+
+      <!-- Copy required native libraries -->
+      <copy todir="${zip.dir}" flatten="true">
+         <file file="${rxtx-macos.native1}"/>
+         <file file="${rxtx-macos.native2}"/>
+         <file file="${rxtx-linux.native}"/>
+         <file file="${rxtx-windows.native1}"/>
+         <file file="${rxtx-windows.native2}"/>
       </copy>
 
       <!-- create javadocs -->
