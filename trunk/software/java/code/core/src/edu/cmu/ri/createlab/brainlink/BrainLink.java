@@ -106,41 +106,40 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @return The raw temperature value of the internal thermometer */
    Integer getThermistor();
 
-
-       /** Plays a tone specified at the frequency in hertz specified by frequency.  Tone will not stop until turnOffSpeaker is called.
-        *
-        * @param frequency frequency in Hz of the tone to play
-        * @return true if the call was made successfully, false otherwise
-        */
+   /** Plays a tone specified at the frequency in hertz specified by frequency.  Tone will not stop until turnOffSpeaker is called.
+    *
+    * @param frequency frequency in Hz of the tone to play
+    * @return true if the call was made successfully, false otherwise
+    */
    boolean playTone(final int frequency);
 
-       /** Turns off the speaker
-        *
-        * @return true if the call was made successfully, false otherwise
-        */
+   /** Turns off the speaker
+    *
+    * @return true if the call was made successfully, false otherwise
+    */
    boolean turnOffSpeaker();
 
-       /** Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.  Currently used by specific robot classes.
-        *
-        * @param initializationBytes The bytes to send the Brainlink to configure it with a specific IR communication protocol.
-        * @return true if the call was made successfully, false otherwise
-        */
+   /** Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.  Currently used by specific robot classes.
+    *
+    * @param initializationBytes The bytes to send the Brainlink to configure it with a specific IR communication protocol.
+    * @return true if the call was made successfully, false otherwise
+    */
    boolean initializeIR(final byte[] initializationBytes);
 
    boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy);
 
    boolean sendSimpleIRCommand(final byte command);
 
-       /** Turns off the IR signal, used in Stop methods in certain robot classes
-        *
-        * @return true if the call was made successfully, false otherwise
-        */
+   /** Turns off the IR signal, used in Stop methods in certain robot classes
+    *
+    * @return true if the call was made successfully, false otherwise
+    */
    boolean turnOffIR();
 
-       /** Sends a specific IR command.  Currently used by the specific robot classes.
-        *
-        * @param commandStrategy An array of bytes encoding the command to send
-        * @return true if the call was made successfully, false otherwise
-        */
+   /** Sends a specific IR command.  Currently used by the specific robot classes.
+    *
+    * @param commandStrategy An array of bytes encoding the command to send
+    * @return true if the call was made successfully, false otherwise
+    */
    boolean sendIRCommand(final IRCommandStrategy commandStrategy);
    }
