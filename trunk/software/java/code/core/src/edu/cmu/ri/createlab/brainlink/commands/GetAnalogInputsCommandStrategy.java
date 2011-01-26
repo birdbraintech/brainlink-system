@@ -14,7 +14,7 @@ public final class GetAnalogInputsCommandStrategy extends ReturnValueCommandStra
    /**
     * The size of the expected response, in bytes.
     */
-   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 5;
+   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 4;
 
    protected int getSizeOfExpectedResponse()
       {
@@ -38,8 +38,7 @@ public final class GetAnalogInputsCommandStrategy extends ReturnValueCommandStra
             return new int[]{ByteUtils.unsignedByteToInt(responseData[0]),
                              ByteUtils.unsignedByteToInt(responseData[1]),
                              ByteUtils.unsignedByteToInt(responseData[2]),
-                             ByteUtils.unsignedByteToInt(responseData[3]),
-                             ByteUtils.unsignedByteToInt(responseData[4])};
+                             ByteUtils.unsignedByteToInt(responseData[3])};
             }
          }
 
