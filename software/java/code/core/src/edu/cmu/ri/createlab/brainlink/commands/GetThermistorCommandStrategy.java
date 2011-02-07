@@ -12,7 +12,7 @@ public final class GetThermistorCommandStrategy extends ReturnValueCommandStrate
    private static final byte[] COMMAND = {'T'};
 
    /** The size of the expected response, in bytes */
-   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 2;
+   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
 
    protected int getSizeOfExpectedResponse()
       {
