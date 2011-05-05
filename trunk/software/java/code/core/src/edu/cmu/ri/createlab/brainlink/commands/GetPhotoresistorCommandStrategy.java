@@ -12,7 +12,7 @@ public final class GetPhotoresistorCommandStrategy extends ReturnValueCommandStr
    private static final byte[] COMMAND = {'L'};
 
    /** The size of the expected response, in bytes */
-   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 2;
+   private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
 
    protected int getSizeOfExpectedResponse()
       {
@@ -29,8 +29,7 @@ public final class GetPhotoresistorCommandStrategy extends ReturnValueCommandStr
       if (result != null && result.wasSuccessful())
          {
          final byte[] responseData = result.getData();
-         return new int[]{ByteUtils.unsignedByteToInt(responseData[0]),
-                          ByteUtils.unsignedByteToInt(responseData[1])};
+         return new int[]{ByteUtils.unsignedByteToInt(responseData[0])};
          }
 
       return null;

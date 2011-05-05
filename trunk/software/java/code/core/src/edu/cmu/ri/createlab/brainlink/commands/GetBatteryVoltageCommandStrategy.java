@@ -9,7 +9,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 public final class GetBatteryVoltageCommandStrategy extends ReturnValueCommandStrategy<Integer>
    {
    /** The command character used to request the value of the battery voltage. */
-   private static final byte[] COMMAND = {'B'};
+   private static final byte[] COMMAND = {'V'};
 
    /** The size of the expected response, in bytes. */
    private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
