@@ -17,10 +17,11 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       this(null);
       }
-        /**  Instantiates a Prime8 class
-        *
-        * @param serialPortNames The serial port identified of the Brainlink connected to this computer
-        */
+
+   /**  Instantiates a TVRemote class
+    *
+    * @param serialPortNames The serial port identified of the Brainlink connected to this computer
+    */
    public TVRemote(final String serialPortNames)
       {
       super(serialPortNames);
@@ -53,7 +54,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.TWO_COMMAND_STRATEGY);
       }
 
-
    public boolean three()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.THREE_COMMAND_STRATEGY);
@@ -63,7 +63,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.FOUR_COMMAND_STRATEGY);
       }
-
 
    public boolean five()
       {
@@ -75,7 +74,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.SIX_COMMAND_STRATEGY);
       }
 
-
    public boolean seven()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.SEVEN_COMMAND_STRATEGY);
@@ -85,7 +83,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.EIGHT_COMMAND_STRATEGY);
       }
-
 
    public boolean nine()
       {
@@ -97,7 +94,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.CHUP_COMMAND_STRATEGY);
       }
 
-
    public boolean channelDown()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.CHDOWN_COMMAND_STRATEGY);
@@ -107,7 +103,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.VOLUP_COMMAND_STRATEGY);
       }
-
 
    public boolean volumeDown()
       {
@@ -119,7 +114,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.MENU_COMMAND_STRATEGY);
       }
 
-
    public boolean plus100()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.PLUS100_COMMAND_STRATEGY);
@@ -129,7 +123,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.MUTE_COMMAND_STRATEGY);
       }
-
 
    public boolean display()
       {
@@ -141,7 +134,6 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.PLAY_COMMAND_STRATEGY);
       }
 
-
    public boolean stopVCR()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.STOPVCR_COMMAND_STRATEGY);
@@ -152,12 +144,10 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.FFD_COMMAND_STRATEGY);
       }
 
-
    public boolean rewind()
       {
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.REW_COMMAND_STRATEGY);
       }
-
 
    public boolean game()
       {
@@ -169,7 +159,7 @@ public final class TVRemote extends BaseBrainLinkControllable
       return executeCommandStrategy(TVRemoteConstants.CommandStrategies.TPROG_COMMAND_STRATEGY);
       }
 
-    private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
+   private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
       {
       final BrainLink brainLink = getBrainLink();
       return brainLink != null && brainLink.sendIRCommand(stopCommandStrategy);
@@ -177,6 +167,6 @@ public final class TVRemote extends BaseBrainLinkControllable
 
    protected void prepareForDisconnect()
       {
-    // does nothing
+      // does nothing
       }
    }
