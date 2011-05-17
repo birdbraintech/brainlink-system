@@ -8,8 +8,8 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class DigitalOutputCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to set a digital output. */
+   {
+   /** The command character used to set a digital output. */
    private static final byte COMMAND_PREFIX = '>';
 
    private final byte[] command;
@@ -25,4 +25,4 @@ public class DigitalOutputCommandStrategy extends CreateLabSerialDeviceNoReturnV
       {
       return command.clone();
       }
-}
+   }

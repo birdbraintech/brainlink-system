@@ -8,8 +8,8 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to send an aux serial transmit command. */
+   {
+   /** The command character used to send an aux serial transmit command. */
    private static final byte COMMAND_PREFIX = 't';
 
    private final byte[] command;
@@ -25,5 +25,4 @@ public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoRet
       {
       return command.clone();
       }
-
-}
+   }

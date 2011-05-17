@@ -1,12 +1,13 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class GetThermistorCommandStrategy extends ReturnValueCommandStrategy<Integer>
+public final class GetThermistorCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<Integer>
    {
    /** The command character used to request the value of the thermistor. */
    private static final byte[] COMMAND = {'T'};
@@ -24,7 +25,7 @@ public final class GetThermistorCommandStrategy extends ReturnValueCommandStrate
       return COMMAND.clone();
       }
 
-   public Integer convertResult(final SerialPortCommandResponse result)
+   public Integer convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

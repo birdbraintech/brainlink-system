@@ -1,5 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
@@ -8,9 +9,9 @@ import edu.cmu.ri.createlab.util.ByteUtils;
  * User: tlauwers
  * Date: May 5, 2011
  */
-public class DigitalInputCommandStrategy extends ReturnValueCommandStrategy<int[]>
-{
- /** The command character used to request the digital input values. */
+public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
+   {
+   /** The command character used to request the digital input values. */
    private static final byte COMMAND_PREFIX = '<';
    private final byte[] command;
 
@@ -20,9 +21,9 @@ public class DigitalInputCommandStrategy extends ReturnValueCommandStrategy<int[
    private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
 
    public DigitalInputCommandStrategy(final byte whichIO)
-   {
-        this.command = new byte[]{COMMAND_PREFIX, whichIO};
-   }
+      {
+      this.command = new byte[]{COMMAND_PREFIX, whichIO};
+      }
 
    protected int getSizeOfExpectedResponse()
       {
@@ -35,7 +36,7 @@ public class DigitalInputCommandStrategy extends ReturnValueCommandStrategy<int[
       }
 
    @Override
-   public int[] convertResult(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {
@@ -49,4 +50,4 @@ public class DigitalInputCommandStrategy extends ReturnValueCommandStrategy<int[
 
       return null;
       }
-}
+   }

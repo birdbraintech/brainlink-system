@@ -18,14 +18,15 @@ import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.ReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
+import edu.cmu.ri.createlab.serial.CommandExecutionFailureHandler;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
+import edu.cmu.ri.createlab.serial.NoReturnValueCommandExecutor;
+import edu.cmu.ri.createlab.serial.ReturnValueCommandExecutor;
 import edu.cmu.ri.createlab.serial.SerialPortCommandExecutionQueue;
-import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.serial.config.BaudRate;
 import edu.cmu.ri.createlab.serial.config.CharacterSize;
 import edu.cmu.ri.createlab.serial.config.FlowControl;
@@ -123,12 +124,14 @@ public final class BrainLinkProxy implements BrainLink
    private final CreateLabSerialDeviceNoReturnValueCommandStrategy disconnectCommandStrategy = new DisconnectCommandStrategy();
    private final CreateLabSerialDeviceNoReturnValueCommandStrategy turnOffSpeakerCommandStrategy = new TurnOffSpeakerCommandStrategy();
    private final CreateLabSerialDeviceNoReturnValueCommandStrategy turnOffIRCommandStrategy = new TurnOffIRCommandStrategy();
-   private final NoReturnValueCommandExecutor noReturnValueCommandExecutor = new NoReturnValueCommandExecutor();
-   private final ReturnValueCommandExecutor<Integer> getBatteryVoltageCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetBatteryVoltageCommandStrategy());
-   private final ReturnValueCommandExecutor<int[]> getAccelerometerStateCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAccelerometerCommandStrategy());
-   private final ReturnValueCommandExecutor<int[]> getPhotoresistorsCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetPhotoresistorCommandStrategy());
-   private final ReturnValueCommandExecutor<int[]> getAnalogInputsCommandExecutor = new ReturnValueCommandExecutor<int[]>(new GetAnalogInputsCommandStrategy());
-   private final ReturnValueCommandExecutor<Integer> getThermistorCommandExecutor = new ReturnValueCommandExecutor<Integer>(new GetThermistorCommandStrategy());
+   private final GetBatteryVoltageCommandStrategy getBatteryVoltageCommandStrategy = new GetBatteryVoltageCommandStrategy();
+   private final GetAccelerometerCommandStrategy getAccelerometerCommandStrategy = new GetAccelerometerCommandStrategy();
+   private final GetPhotoresistorCommandStrategy getPhotoresistorCommandStrategy = new GetPhotoresistorCommandStrategy();
+   private final GetAnalogInputsCommandStrategy getAnalogInputsCommandStrategy = new GetAnalogInputsCommandStrategy();
+   private final GetThermistorCommandStrategy getThermistorCommandStrategy = new GetThermistorCommandStrategy();
+   private final NoReturnValueCommandExecutor noReturnValueCommandExecutor;
+   private final ReturnValueCommandExecutor<Integer> integerReturnValueCommandExecutor;
+   private final ReturnValueCommandExecutor<int[]> intArrayReturnValueCommandExecutor;
 
    private final BrainLinkPinger brainLinkPinger = new BrainLinkPinger();
    private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLinkProxy.peerPingScheduler"));
@@ -139,6 +142,18 @@ public final class BrainLinkProxy implements BrainLink
       {
       this.commandQueue = commandQueue;
       this.serialPortName = serialPortName;
+
+      final CommandExecutionFailureHandler commandExecutionFailureHandler =
+            new CommandExecutionFailureHandler()
+            {
+            public void handleExecutionFailure()
+               {
+               brainLinkPinger.forceFailure();
+               }
+            };
+      noReturnValueCommandExecutor = new NoReturnValueCommandExecutor(commandQueue, commandExecutionFailureHandler);
+      integerReturnValueCommandExecutor = new ReturnValueCommandExecutor<Integer>(commandQueue, commandExecutionFailureHandler);
+      intArrayReturnValueCommandExecutor = new ReturnValueCommandExecutor<int[]>(commandQueue, commandExecutionFailureHandler);
 
       // schedule periodic peer pings
       peerPingScheduledFuture = peerPingScheduler.scheduleAtFixedRate(brainLinkPinger,
@@ -170,12 +185,12 @@ public final class BrainLinkProxy implements BrainLink
 
    public Integer getBatteryVoltage()
       {
-      return getBatteryVoltageCommandExecutor.execute();
+      return integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy);
       }
 
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(new FullColorLEDCommandStrategy(red, green, blue));
+      return noReturnValueCommandExecutor.execute(new FullColorLEDCommandStrategy(red, green, blue));
       }
 
    public boolean setFullColorLED(final Color color)
@@ -185,7 +200,7 @@ public final class BrainLinkProxy implements BrainLink
 
    public int[] getLightSensors()
       {
-      return getPhotoresistorsCommandExecutor.execute();
+      return intArrayReturnValueCommandExecutor.execute(getPhotoresistorCommandStrategy);
       }
 
    public double[] getAccelerometerValuesInGs()
@@ -263,12 +278,12 @@ public final class BrainLinkProxy implements BrainLink
 
    private int[] getRawAccelerometerState()
       {
-      return getAccelerometerStateCommandExecutor.execute();
+      return intArrayReturnValueCommandExecutor.execute(getAccelerometerCommandStrategy);
       }
 
    public int[] getAnalogInputs()
       {
-      return getAnalogInputsCommandExecutor.execute();
+      return intArrayReturnValueCommandExecutor.execute(getAnalogInputsCommandStrategy);
       }
 
    public Integer getAnalogInput(final int port)
@@ -309,27 +324,27 @@ public final class BrainLinkProxy implements BrainLink
 
    public Integer getThermistor()
       {
-      return getThermistorCommandExecutor.execute();
+      return integerReturnValueCommandExecutor.execute(getThermistorCommandStrategy);
       }
 
    public boolean playTone(final int frequency)
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(new PlayToneCommandStrategy(frequency));
+      return noReturnValueCommandExecutor.execute(new PlayToneCommandStrategy(frequency));
       }
 
    public boolean turnOffSpeaker()
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(turnOffSpeakerCommandStrategy);
+      return noReturnValueCommandExecutor.execute(turnOffSpeakerCommandStrategy);
       }
 
    public boolean initializeIR(final byte[] initializationBytes)
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(new InitializeIRCommandStrategy(initializationBytes));
+      return noReturnValueCommandExecutor.execute(new InitializeIRCommandStrategy(initializationBytes));
       }
 
    public boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy)
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(commandStrategy);
+      return noReturnValueCommandExecutor.execute(commandStrategy);
       }
 
    public boolean sendSimpleIRCommand(final byte command)
@@ -339,12 +354,12 @@ public final class BrainLinkProxy implements BrainLink
 
    public boolean turnOffIR()
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(turnOffIRCommandStrategy);
+      return noReturnValueCommandExecutor.execute(turnOffIRCommandStrategy);
       }
 
    public boolean sendIRCommand(final IRCommandStrategy commandStrategy)
       {
-      return noReturnValueCommandExecutor.executeAndReturnStatus(commandStrategy);
+      return noReturnValueCommandExecutor.execute(commandStrategy);
       }
 
    public void disconnect()
@@ -464,50 +479,6 @@ public final class BrainLinkProxy implements BrainLink
       private void forceFailure()
          {
          handlePingFailure();
-         }
-      }
-
-   private final class ReturnValueCommandExecutor<T>
-      {
-      private final ReturnValueCommandStrategy<T> commandStrategy;
-
-      private ReturnValueCommandExecutor(final ReturnValueCommandStrategy<T> commandStrategy)
-         {
-         this.commandStrategy = commandStrategy;
-         }
-
-      private T execute()
-         {
-         try
-            {
-            final SerialPortCommandResponse response = commandQueue.execute(commandStrategy);
-            return commandStrategy.convertResult(response);
-            }
-         catch (Exception e)
-            {
-            LOG.error("Exception caught while trying to execute a command", e);
-            brainLinkPinger.forceFailure();
-            }
-
-         return null;
-         }
-      }
-
-   private final class NoReturnValueCommandExecutor
-      {
-      private boolean executeAndReturnStatus(final CreateLabSerialDeviceNoReturnValueCommandStrategy commandStrategy)
-         {
-         try
-            {
-            return commandQueue.executeAndReturnStatus(commandStrategy);
-            }
-         catch (Exception e)
-            {
-            LOG.error("Exception caught while trying to execute a command", e);
-            brainLinkPinger.forceFailure();
-            }
-
-         return false;
          }
       }
    }

@@ -8,8 +8,8 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class PlayStoredIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to play a stored IR command. */
+   {
+   /** The command character used to play a stored IR command. */
    private static final byte COMMAND_PREFIX = 'G';
 
    private final byte[] command;
@@ -25,4 +25,4 @@ public class PlayStoredIRCommandStrategy extends CreateLabSerialDeviceNoReturnVa
       {
       return command.clone();
       }
-}
+   }

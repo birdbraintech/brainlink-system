@@ -8,21 +8,21 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class DACCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to send a DAC command. */
+   {
+   /** The command character used to send a DAC command. */
    private static final byte COMMAND_PREFIX = 'd';
 
    private final byte[] command;
 
-   public DACCommandStrategy(final byte whichDAC, final byte DACValue)
+   public DACCommandStrategy(final byte whichDAC, final byte dacValue)
       {
       this.command = new byte[]{COMMAND_PREFIX,
                                 whichDAC,
-                                DACValue};
+                                dacValue};
       }
 
    protected byte[] getCommand()
       {
       return command.clone();
       }
-}
+   }

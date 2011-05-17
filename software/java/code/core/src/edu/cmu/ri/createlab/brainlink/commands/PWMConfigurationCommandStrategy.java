@@ -8,17 +8,17 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class PWMConfigurationCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to set up the PWM carrier frequency. */
+   {
+   /** The command character used to set up the PWM carrier frequency. */
    private static final byte COMMAND_PREFIX = 'P';
 
    private final byte[] command;
 
-   public PWMConfigurationCommandStrategy(final byte PWMfrequency)
+   public PWMConfigurationCommandStrategy(final byte pwmFrequency)
       {
       this.command = new byte[]{COMMAND_PREFIX,
-                                getHighByteFromInt(PWMfrequency),
-                                getLowByteFromInt(PWMfrequency)};
+                                getHighByteFromInt(pwmFrequency),
+                                getLowByteFromInt(pwmFrequency)};
       }
 
    private byte getHighByteFromInt(final int val)
@@ -30,8 +30,9 @@ public class PWMConfigurationCommandStrategy extends CreateLabSerialDeviceNoRetu
       {
       return (byte)((val << 24) >> 24);
       }
+
    protected byte[] getCommand()
       {
       return command.clone();
       }
-}
+   }
