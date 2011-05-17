@@ -8,8 +8,8 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Date: May 5, 2011
  */
 public class StoreIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
-{
-  /** The command character used to indicate where the most recently captured IR signal should be stored.*/
+   {
+   /** The command character used to indicate where the most recently captured IR signal should be stored.*/
    private static final byte COMMAND_PREFIX = 'S';
 
    private final byte[] command;
@@ -24,4 +24,4 @@ public class StoreIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCo
       {
       return command.clone();
       }
-}
+   }

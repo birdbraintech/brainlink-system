@@ -1,12 +1,13 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class GetPhotoresistorCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetPhotoresistorCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the value of the photoresistors. */
    private static final byte[] COMMAND = {'L'};
@@ -24,7 +25,7 @@ public final class GetPhotoresistorCommandStrategy extends ReturnValueCommandStr
       return COMMAND.clone();
       }
 
-   public int[] convertResult(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

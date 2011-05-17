@@ -1,12 +1,13 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class GetAnalogInputsCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetAnalogInputsCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the analog input values. */
    private static final byte[] COMMAND = {'X'};
@@ -27,7 +28,7 @@ public final class GetAnalogInputsCommandStrategy extends ReturnValueCommandStra
       }
 
    @Override
-   public int[] convertResult(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

@@ -1,12 +1,13 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class GetAccelerometerCommandStrategy extends ReturnValueCommandStrategy<int[]>
+public final class GetAccelerometerCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
    {
    /** The command character used to request the value of the accelerometer. */
    private static final byte[] COMMAND = {'A'};
@@ -28,7 +29,7 @@ public final class GetAccelerometerCommandStrategy extends ReturnValueCommandStr
       }
 
    @Override
-   public int[] convertResult(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {
