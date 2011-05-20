@@ -6,6 +6,7 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
  * Created by IntelliJ IDEA.
  * User: tlauwers
  * Date: May 5, 2011
+ * No longer needed
  */
 public class PWMConfigurationCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
    {

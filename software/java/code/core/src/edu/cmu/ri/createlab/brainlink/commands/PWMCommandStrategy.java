@@ -14,12 +14,15 @@ public class PWMCommandStrategy extends CreateLabSerialDeviceNoReturnValueComman
 
    private final byte[] command;
 
-   public PWMCommandStrategy(final byte whichPWM, final byte pwmDuty)
+   public PWMCommandStrategy(final byte whichPWM, final int pwmDuty, final int pwmFrequency)
       {
       this.command = new byte[]{COMMAND_PREFIX,
                                 whichPWM,
                                 getHighByteFromInt(pwmDuty),
-                                getLowByteFromInt(pwmDuty)};
+                                getLowByteFromInt(pwmDuty),
+                                'P',
+                                getHighByteFromInt(pwmFrequency),
+                                getLowByteFromInt(pwmFrequency)};
       }
 
    private byte getHighByteFromInt(final int val)

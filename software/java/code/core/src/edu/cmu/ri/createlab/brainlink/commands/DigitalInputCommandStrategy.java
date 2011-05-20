@@ -9,7 +9,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
  * User: tlauwers
  * Date: May 5, 2011
  */
-public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
+public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<Boolean>
    {
    /** The command character used to request the digital input values. */
    private static final byte COMMAND_PREFIX = '<';
@@ -20,9 +20,9 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
     */
    private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
 
-   public DigitalInputCommandStrategy(final byte whichIO)
+   public DigitalInputCommandStrategy(final int whichIO)
       {
-      this.command = new byte[]{COMMAND_PREFIX, whichIO};
+      this.command = new byte[]{COMMAND_PREFIX, (byte)whichIO};
       }
 
    protected int getSizeOfExpectedResponse()
@@ -36,7 +36,7 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
       }
 
    @Override
-   public int[] convertResponse(final SerialPortCommandResponse result)
+   public Boolean convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {
@@ -44,7 +44,15 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
 
          if (responseData != null && responseData.length == SIZE_IN_BYTES_OF_EXPECTED_RESPONSE)
             {
-            return new int[]{ByteUtils.unsignedByteToInt(responseData[0])};
+                if(responseData[0] == '0') {
+                   return false;
+                }
+                else if(responseData[0] == '1') {
+                    return true;
+                }
+                else {
+                    return null;
+                }
             }
          }
 

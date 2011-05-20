@@ -14,11 +14,11 @@ public class DACCommandStrategy extends CreateLabSerialDeviceNoReturnValueComman
 
    private final byte[] command;
 
-   public DACCommandStrategy(final byte whichDAC, final byte dacValue)
+   public DACCommandStrategy(final byte whichDAC, final int dacValue)
       {
       this.command = new byte[]{COMMAND_PREFIX,
                                 whichDAC,
-                                dacValue};
+                                (byte)dacValue};
       }
 
    protected byte[] getCommand()
