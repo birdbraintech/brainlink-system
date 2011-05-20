@@ -7,7 +7,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class GetPhotoresistorCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<int[]>
+public final class GetPhotoresistorCommandStrategy extends CreateLabSerialDeviceReturnValueCommandStrategy<Integer>
    {
    /** The command character used to request the value of the photoresistors. */
    private static final byte[] COMMAND = {'L'};
@@ -25,12 +25,12 @@ public final class GetPhotoresistorCommandStrategy extends CreateLabSerialDevice
       return COMMAND.clone();
       }
 
-   public int[] convertResponse(final SerialPortCommandResponse result)
+   public Integer convertResponse(final SerialPortCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {
          final byte[] responseData = result.getData();
-         return new int[]{ByteUtils.unsignedByteToInt(responseData[0])};
+         return ByteUtils.unsignedByteToInt(responseData[0]);
          }
 
       return null;

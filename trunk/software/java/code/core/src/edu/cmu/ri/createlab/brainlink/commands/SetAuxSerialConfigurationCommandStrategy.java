@@ -26,7 +26,7 @@ public final class SetAuxSerialConfigurationCommandStrategy extends CreateLabSer
               }
           else
           {
-              int baud = (int)((32000000/baudRate*16-1);
+              int baud = (int)((32000000/baudRate*16-1));
                         byte scale = 0;
                          this.command = new byte[]{COMMAND_PREFIX,
                                               getHighByteFromInt(baud),

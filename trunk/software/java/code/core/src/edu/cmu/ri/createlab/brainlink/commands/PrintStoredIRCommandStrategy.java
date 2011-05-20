@@ -15,9 +15,9 @@ public class PrintStoredIRCommandStrategy extends CreateLabSerialDeviceVariableL
    private static final byte COMMAND_PREFIX = 'r';
    private final byte[] command;
 
-   public PrintStoredIRCommandStrategy(final byte whichSignal)
+   public PrintStoredIRCommandStrategy(final int whichSignal)
       {
-      this.command = new byte[]{COMMAND_PREFIX, whichSignal};
+      this.command = new byte[]{COMMAND_PREFIX, (byte)whichSignal};
       }
 
    protected byte[] getCommand()

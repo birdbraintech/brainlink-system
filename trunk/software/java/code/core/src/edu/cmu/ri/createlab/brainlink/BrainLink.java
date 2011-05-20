@@ -41,9 +41,9 @@ public interface BrainLink extends CreateLabDeviceProxy
    /**
     * Returns the light sensor values; returns <code>null</code> if the light sensors could not be read.
     *
-    * @return a two int array containing the left and right light sensor values.
+    * @return an int containing the light sensor value.
     */
-   int[] getLightSensors();
+   Integer getLightSensor();
 
    /**
     * Returns the accelerometer values in Gs; returns <code>null</code> if the accelerometer could not be read.
@@ -98,7 +98,7 @@ public interface BrainLink extends CreateLabDeviceProxy
    /**
     * Returns the analog input values; returns <code>null</code> if the inputs could not be read.
     *
-    * @return A four element array containing the raw sensor values of the four external analog inputs
+    * @return A six element array containing the raw sensor values of the six external analog inputs
     */
    int[] getAnalogInputs();
 
@@ -106,23 +106,79 @@ public interface BrainLink extends CreateLabDeviceProxy
     * Returns the value of the given analog input; returns <code>null</code> if the specified port could not be read or
     * is invalid.
     *
-    * @return The raw analog reading (0-255) of one of the four external analog ports, <code>null</code> if the port couldn't be read
+    * @return The raw analog reading (0-255) of one of the six external analog ports, <code>null</code> if the port couldn't be read
     */
-   Integer getAnalogInput(int port);
+   Integer getAnalogInput(final int port);
 
    /**
-    * Returns the value of the left light sensor; returns <code>null</code> if the light sensor could not be read.
+    *  Returns true if the digital input is logic high, false if low, and null if the port was invalid or could not be read.
     *
-    * @return The analog value of the left light sensor
+    * @param port sets the input port to read, valid numbers are 0-9
+    * @return <code>true</code> if the value on the port is logic high, <code>false</code> if logic low, and null if it
+    * could not be read
     */
-   Integer getLeftLightSensor();
+   Boolean getDigitalInput(final int port);
 
    /**
-    * Returns the value of the right light sensor; returns <code>null</code> if the light sensor could not be read.
+    *  Sets one of the digital output ports; true for logic high, false for low.
     *
-    * @return The analog value of the right light sensor
+    * @param port sets the output port to use, valid numbers are 0-9
+    * @param value sets the port to either logic high or low
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   Integer getRightLightSensor();
+   boolean setDigitalOutput(final int port, final boolean value);
+
+   /**
+    * Configures the PWM module's frequency.
+    *
+    * @param frequency the frequency in Hertz to set the PWM waveform to.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+ //  boolean configurePWM(final int frequency);
+
+   /**
+    * Sets the duty cycle of one of the two PWM ports.
+    *
+    * @param port the PWM port to set
+    * @param dutyCycle the duty of the PWM signal, specified in % (0-100)
+    * @param PWMfrequency the frequency of the PWM signal in Hertz.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean setPWM(final byte port, final int dutyCycle, final int PWMfrequency);
+
+   /**
+    * Sets the voltage of one of the two DAC ports
+    *
+    * @param port the DAC port to set
+    * @param value the value, in milliVolts, to set the DAC to.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean setDAC(final byte port, final int value);
+
+   /**
+    *  Sets the baud rate of the auxiliary serial port. Only the baud rate is configurable. The serial port always uses
+    *  8 bits, no flow control, and one stop bit.
+    *
+    * @param baudrate the baudrate, in baud, to configure the serial port to.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean configureSerialPort(final int baudrate);
+
+   /**
+    * Transmits a stream of bytes over the auxiliary serial port.
+    *
+    * @param  bytesToSend an array of bytes to send over the serial port
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean transmitBytesOverSerial(final byte[] bytesToSend);
+
+   /**
+    *  Returns the auxiliary serial port's receive buffer.
+    *
+    * @return an array of ints corresponding to the serial receive buffer. The buffer can only handle 256 bytes at a time,
+    * so in high-data transfer applications this must be checked frequently.
+    */
+   int[] receiveBytesOverSerial();
 
    /**
     * Returns the thermistor value; returns <code>null</code> if the thermistor could not be read.
@@ -174,4 +230,51 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
    boolean sendIRCommand(final IRCommandStrategy commandStrategy);
+
+   /**
+    *  Will record any IR signal detected by the IR receiver, and returns this signal's measurements as an array of ints.
+    *  Array elements are measurements in milliseconds of the time between the signal's falling or rising edges.
+    *  The signal always begins with a rising edge and ends with a falling edge, therefore an even number of elements is always
+    *  expected.
+    *
+    * @return An array of time measurements corresponding to an infrared signal.
+    */
+   int[]  recordIR();
+
+   /**
+    *  Stores the most recently recorded IR signal to the Brainlink's on-board EEPROM (which survives power cycling).
+    *  There are five EEPROM positions to store IR signals to, so Brainlink can store up to 5 raw IR signals.
+    *
+    * @param position the position to store the IR signal to (range is 0 to 4)
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean storeIR(final int position);
+
+   /**
+    *  Sends the IR signal recorded in the EEPROM position specified.
+    *
+    * @param position the position to play the IR signal from (range is 0 to 4)
+    * @param repeatTime the amount of delay, in milliseconds, between successive signals. Use 0 if the signal should not repeat.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean playIR(final int position, final int repeatTime);
+
+   /**
+    *  Sends a "Raw" IR signal to transmit over the tether's IR LED.
+    *
+    * @param signal the raw IR signal consisting of time measurements.
+    * @param repeatTime the amount of delay, in milliseconds, between successive signals. Use 0 if the signal should not repeat.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean sendRawIR(final int[] signal, final int repeatTime);
+
+   /**
+    *  Returns the IR signal recorded in the EEPROM position specified so that the host computer can read and analyze it.
+    *  Note that the signal returned is of the same format as that returned by recordIR.
+    *
+    * @param position the position to print the IR signal from (range is 0 to 4)
+    * @return An array of time measurements corresponding to an infrared signal, null if invalid.
+    */
+   int[] printIR(final int position);
+
    }
