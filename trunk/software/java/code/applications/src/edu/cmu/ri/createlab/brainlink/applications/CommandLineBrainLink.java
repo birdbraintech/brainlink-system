@@ -447,8 +447,8 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       println("S         Returns whether the BrainLink was shaken since last accelerometer read");
       println("T         Returns whether the BrainLink was tapped since last accelerometer read");
       println("U         Returns whether the BrainLink was shaken or tapped since last accelerometer read");
-      println("l         Get the state of the photoresistors");
-      println("L         Continuously poll the photoresistors for 30 seconds");
+      println("l         Get the state of the photoresistor");
+      println("L         Continuously poll the photoresistor for 30 seconds");
       println("n         Get the analog input values");
       println("h         Get the state of the thermistor");
       println("H         Continuously poll the thermistor for 30 seconds");
@@ -522,13 +522,13 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
 
    private String convertPhotoresistorStateToString()
       {
-      final int[] photoresistors = brainLink.getLightSensors();
-      if (photoresistors != null)
+      final Integer photoresistor = brainLink.getLightSensor();
+      if (photoresistor != null)
          {
-         return "Photoresistors: " + ArrayUtils.arrayToString(photoresistors);
+         return "Photoresistor: " + photoresistor;
          }
 
-      return "Photoresistors: failed to read value";
+      return "Photoresistor: failed to read value";
       }
 
    private String convertAnalogInputsToString()
