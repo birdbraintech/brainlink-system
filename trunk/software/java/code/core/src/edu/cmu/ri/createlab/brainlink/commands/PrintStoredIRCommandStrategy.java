@@ -1,7 +1,7 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceVariableLengthReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
+import edu.cmu.ri.createlab.serial.SerialDeviceCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
@@ -38,7 +38,7 @@ public class PrintStoredIRCommandStrategy extends CreateLabSerialDeviceVariableL
       }
 
    @Override
-   public int[] convertResponse(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialDeviceCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

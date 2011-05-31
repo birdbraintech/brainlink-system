@@ -19,6 +19,7 @@ public class InitializeIRCommandStrategy extends CreateLabSerialDeviceNoReturnVa
       System.arraycopy(initializationBytes, 0, this.command, 1, initializationBytes.length);
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

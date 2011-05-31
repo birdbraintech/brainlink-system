@@ -20,6 +20,7 @@ public class StoreIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCo
                                 (byte)whichSignal};
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

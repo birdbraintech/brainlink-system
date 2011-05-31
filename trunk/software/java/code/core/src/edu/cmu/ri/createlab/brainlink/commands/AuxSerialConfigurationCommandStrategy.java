@@ -31,6 +31,7 @@ public final class AuxSerialConfigurationCommandStrategy extends CreateLabSerial
       return (byte)((val << 24) >> 24);
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

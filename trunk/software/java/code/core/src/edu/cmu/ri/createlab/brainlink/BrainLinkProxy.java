@@ -7,19 +7,44 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import edu.cmu.ri.createlab.brainlink.commands.*;
+import edu.cmu.ri.createlab.brainlink.commands.AuxSerialReceiveCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.AuxSerialTransmitCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.DACCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.DigitalInputCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.DigitalOutputCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.DisconnectCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.FullColorLEDCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PWMCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PlayStoredIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PlayToneCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.PrintStoredIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.RecordIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.SendRawIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.SetAuxSerialConfigurationCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.StoreIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
+import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
-import edu.cmu.ri.createlab.serial.CommandExecutionFailureHandler;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.serial.NoReturnValueCommandExecutor;
-import edu.cmu.ri.createlab.serial.ReturnValueCommandExecutor;
-import edu.cmu.ri.createlab.serial.SerialPortCommandExecutionQueue;
+import edu.cmu.ri.createlab.serial.SerialDeviceCommandExecutionQueue;
+import edu.cmu.ri.createlab.serial.SerialDeviceNoReturnValueCommandExecutor;
+import edu.cmu.ri.createlab.serial.SerialDeviceReturnValueCommandExecutor;
 import edu.cmu.ri.createlab.serial.config.BaudRate;
 import edu.cmu.ri.createlab.serial.config.CharacterSize;
 import edu.cmu.ri.createlab.serial.config.FlowControl;
 import edu.cmu.ri.createlab.serial.config.Parity;
 import edu.cmu.ri.createlab.serial.config.SerialIOConfiguration;
 import edu.cmu.ri.createlab.serial.config.StopBits;
+import edu.cmu.ri.createlab.util.commandexecution.CommandExecutionFailureHandler;
 import edu.cmu.ri.createlab.util.thread.DaemonThreadFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -61,7 +86,7 @@ public final class BrainLinkProxy implements BrainLink
       try
          {
          // create the serial port command queue
-         final SerialPortCommandExecutionQueue commandQueue = SerialPortCommandExecutionQueue.create(APPLICATION_NAME, config);
+         final SerialDeviceCommandExecutionQueue commandQueue = SerialDeviceCommandExecutionQueue.create(APPLICATION_NAME, config);
 
          // see whether its creation was successful
          if (commandQueue == null)
@@ -106,7 +131,7 @@ public final class BrainLinkProxy implements BrainLink
       return null;
       }
 
-   private final SerialPortCommandExecutionQueue commandQueue;
+   private final SerialDeviceCommandExecutionQueue commandQueue;
    private final String serialPortName;
    private final CreateLabSerialDeviceNoReturnValueCommandStrategy disconnectCommandStrategy = new DisconnectCommandStrategy();
    private final CreateLabSerialDeviceNoReturnValueCommandStrategy turnOffSpeakerCommandStrategy = new TurnOffSpeakerCommandStrategy();
@@ -116,18 +141,17 @@ public final class BrainLinkProxy implements BrainLink
    private final GetPhotoresistorCommandStrategy getPhotoresistorCommandStrategy = new GetPhotoresistorCommandStrategy();
    private final GetAnalogInputsCommandStrategy getAnalogInputsCommandStrategy = new GetAnalogInputsCommandStrategy();
    private final GetThermistorCommandStrategy getThermistorCommandStrategy = new GetThermistorCommandStrategy();
-   private final NoReturnValueCommandExecutor noReturnValueCommandExecutor;
-   private final ReturnValueCommandExecutor<Integer> integerReturnValueCommandExecutor;
-   private final ReturnValueCommandExecutor<int[]> intArrayReturnValueCommandExecutor;
-
-   private ReturnValueCommandExecutor<Boolean> getDigitalInputCommandExecutor;
+   private final SerialDeviceNoReturnValueCommandExecutor noReturnValueCommandExecutor;
+   private final SerialDeviceReturnValueCommandExecutor<Integer> integerReturnValueCommandExecutor;
+   private final SerialDeviceReturnValueCommandExecutor<int[]> intArrayReturnValueCommandExecutor;
+   private final SerialDeviceReturnValueCommandExecutor<Boolean> booleanReturnValueCommandExecutor;
 
    private final BrainLinkPinger brainLinkPinger = new BrainLinkPinger();
    private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLinkProxy.peerPingScheduler"));
    private final ScheduledFuture<?> peerPingScheduledFuture;
    private final Collection<CreateLabDevicePingFailureEventListener> createLabDevicePingFailureEventListeners = new HashSet<CreateLabDevicePingFailureEventListener>();
 
-   private BrainLinkProxy(final SerialPortCommandExecutionQueue commandQueue, final String serialPortName)
+   private BrainLinkProxy(final SerialDeviceCommandExecutionQueue commandQueue, final String serialPortName)
       {
       this.commandQueue = commandQueue;
       this.serialPortName = serialPortName;
@@ -140,9 +164,10 @@ public final class BrainLinkProxy implements BrainLink
                brainLinkPinger.forceFailure();
                }
             };
-      noReturnValueCommandExecutor = new NoReturnValueCommandExecutor(commandQueue, commandExecutionFailureHandler);
-      integerReturnValueCommandExecutor = new ReturnValueCommandExecutor<Integer>(commandQueue, commandExecutionFailureHandler);
-      intArrayReturnValueCommandExecutor = new ReturnValueCommandExecutor<int[]>(commandQueue, commandExecutionFailureHandler);
+      noReturnValueCommandExecutor = new SerialDeviceNoReturnValueCommandExecutor(commandQueue, commandExecutionFailureHandler);
+      integerReturnValueCommandExecutor = new SerialDeviceReturnValueCommandExecutor<Integer>(commandQueue, commandExecutionFailureHandler);
+      intArrayReturnValueCommandExecutor = new SerialDeviceReturnValueCommandExecutor<int[]>(commandQueue, commandExecutionFailureHandler);
+      booleanReturnValueCommandExecutor = new SerialDeviceReturnValueCommandExecutor<Boolean>(commandQueue, commandExecutionFailureHandler);
 
       // schedule periodic peer pings
       peerPingScheduledFuture = peerPingScheduler.scheduleAtFixedRate(brainLinkPinger,
@@ -289,15 +314,14 @@ public final class BrainLinkProxy implements BrainLink
       }
 
    public Boolean getDigitalInput(final int port)
-   {
-     //  getDigitalInputCommandExecutor = new ReturnValueCommandExecutor<Boolean>(DigitalInputCommandStrategy);
-       return getDigitalInputCommandExecutor.execute(new DigitalInputCommandStrategy(port));
-   }
+      {
+      return booleanReturnValueCommandExecutor.execute(new DigitalInputCommandStrategy(port));
+      }
 
    public boolean setDigitalOutput(final int port, final boolean value)
-   {
-       return noReturnValueCommandExecutor.execute(new DigitalOutputCommandStrategy(port, value));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new DigitalOutputCommandStrategy(port, value));
+      }
 
    public Integer getThermistor()
       {
@@ -305,29 +329,29 @@ public final class BrainLinkProxy implements BrainLink
       }
 
    public boolean setPWM(final byte port, final int dutyCycle, final int PWMfrequency)
-   {
-       return noReturnValueCommandExecutor.execute(new PWMCommandStrategy(port, dutyCycle, PWMfrequency));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new PWMCommandStrategy(port, dutyCycle, PWMfrequency));
+      }
 
    public boolean setDAC(final byte port, final int value)
-   {
+      {
       return noReturnValueCommandExecutor.execute(new DACCommandStrategy(port, value));
-   }
+      }
 
    public boolean configureSerialPort(final int baudRate)
-   {
-       return noReturnValueCommandExecutor.execute(new SetAuxSerialConfigurationCommandStrategy(baudRate));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new SetAuxSerialConfigurationCommandStrategy(baudRate));
+      }
 
    public boolean transmitBytesOverSerial(final byte[] bytesToSend)
-   {
-       return noReturnValueCommandExecutor.execute(new AuxSerialTransmitCommandStrategy(bytesToSend));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new AuxSerialTransmitCommandStrategy(bytesToSend));
+      }
 
    public int[] receiveBytesOverSerial()
-   {
-        return intArrayReturnValueCommandExecutor.execute(new AuxSerialReceiveCommandStrategy());
-   }
+      {
+      return intArrayReturnValueCommandExecutor.execute(new AuxSerialReceiveCommandStrategy());
+      }
 
    public boolean playTone(final int frequency)
       {
@@ -365,30 +389,29 @@ public final class BrainLinkProxy implements BrainLink
       }
 
    public int[] recordIR()
-   {
-       return intArrayReturnValueCommandExecutor.execute(new RecordIRCommandStrategy());
-   }
+      {
+      return intArrayReturnValueCommandExecutor.execute(new RecordIRCommandStrategy());
+      }
 
    public boolean storeIR(final int position)
-   {
-       return noReturnValueCommandExecutor.execute(new StoreIRCommandStrategy(position));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new StoreIRCommandStrategy(position));
+      }
 
    public boolean playIR(final int position, final int repeatTime)
-   {
-       return noReturnValueCommandExecutor.execute(new PlayStoredIRCommandStrategy(position, repeatTime));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new PlayStoredIRCommandStrategy(position, repeatTime));
+      }
 
    public boolean sendRawIR(final int[] signal, final int repeatTime)
-   {
-       return noReturnValueCommandExecutor.execute(new SendRawIRCommandStrategy(signal, repeatTime));
-   }
+      {
+      return noReturnValueCommandExecutor.execute(new SendRawIRCommandStrategy(signal, repeatTime));
+      }
 
    public int[] printIR(final int position)
-   {
-        return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
-   }
-
+      {
+      return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
+      }
 
    public void disconnect()
       {
@@ -438,13 +461,13 @@ public final class BrainLinkProxy implements BrainLink
       // shut down the command queue, which closes the serial port
       try
          {
-         LOG.debug("BrainLinkProxy.disconnect(): shutting down the SerialPortCommandExecutionQueue...");
+         LOG.debug("BrainLinkProxy.disconnect(): shutting down the SerialDeviceCommandExecutionQueue...");
          commandQueue.shutdown();
-         LOG.debug("BrainLinkProxy.disconnect(): done shutting down the SerialPortCommandExecutionQueue");
+         LOG.debug("BrainLinkProxy.disconnect(): done shutting down the SerialDeviceCommandExecutionQueue");
          }
       catch (Exception e)
          {
-         LOG.error("BrainLinkProxy.disconnect(): Exception while trying to shut down the SerialPortCommandExecutionQueue", e);
+         LOG.error("BrainLinkProxy.disconnect(): Exception while trying to shut down the SerialDeviceCommandExecutionQueue", e);
          }
       }
 

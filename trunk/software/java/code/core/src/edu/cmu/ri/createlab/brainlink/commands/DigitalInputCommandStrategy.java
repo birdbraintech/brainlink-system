@@ -1,8 +1,7 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
-import edu.cmu.ri.createlab.util.ByteUtils;
+import edu.cmu.ri.createlab.serial.SerialDeviceCommandResponse;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,18 +24,20 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
       this.command = new byte[]{COMMAND_PREFIX, (byte)whichIO};
       }
 
+   @Override
    protected int getSizeOfExpectedResponse()
       {
       return SIZE_IN_BYTES_OF_EXPECTED_RESPONSE;
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();
       }
 
    @Override
-   public Boolean convertResponse(final SerialPortCommandResponse result)
+   public Boolean convertResponse(final SerialDeviceCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {
@@ -44,15 +45,18 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
 
          if (responseData != null && responseData.length == SIZE_IN_BYTES_OF_EXPECTED_RESPONSE)
             {
-                if(responseData[0] == '0') {
-                   return false;
-                }
-                else if(responseData[0] == '1') {
-                    return true;
-                }
-                else {
-                    return null;
-                }
+            if (responseData[0] == '0')
+               {
+               return false;
+               }
+            else if (responseData[0] == '1')
+               {
+               return true;
+               }
+            else
+               {
+               return null;
+               }
             }
          }
 

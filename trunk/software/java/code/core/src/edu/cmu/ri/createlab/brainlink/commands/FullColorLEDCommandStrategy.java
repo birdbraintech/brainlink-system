@@ -23,6 +23,7 @@ public final class FullColorLEDCommandStrategy extends CreateLabSerialDeviceNoRe
                                 ByteUtils.intToUnsignedByte(MathUtils.ensureRange(blue, BrainLinkConstants.FULL_COLOR_LED_DEVICE_MIN_INTENSITY, BrainLinkConstants.FULL_COLOR_LED_DEVICE_MAX_INTENSITY))};
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

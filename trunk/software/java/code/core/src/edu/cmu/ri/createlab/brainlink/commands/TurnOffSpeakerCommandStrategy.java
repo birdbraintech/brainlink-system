@@ -10,6 +10,7 @@ public final class TurnOffSpeakerCommandStrategy extends CreateLabSerialDeviceNo
    /** The command character used to turn off the speaker. */
    private static final byte[] COMMAND = {'b'};
 
+   @Override
    protected byte[] getCommand()
       {
       return COMMAND.clone();

@@ -10,6 +10,7 @@ public final class TurnOffIRCommandStrategy extends CreateLabSerialDeviceNoRetur
    /** The command character used to turn off IR. */
    private static final byte[] COMMAND = {'!'};
 
+   @Override
    protected byte[] getCommand()
       {
       return COMMAND.clone();
