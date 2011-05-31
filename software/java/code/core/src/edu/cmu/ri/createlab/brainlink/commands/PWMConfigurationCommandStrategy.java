@@ -32,6 +32,7 @@ public class PWMConfigurationCommandStrategy extends CreateLabSerialDeviceNoRetu
       return (byte)((val << 24) >> 24);
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

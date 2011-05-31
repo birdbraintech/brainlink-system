@@ -21,6 +21,7 @@ public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoRet
       System.arraycopy(bytesToTransmit, 0, this.command, 1, bytesToTransmit.length);
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

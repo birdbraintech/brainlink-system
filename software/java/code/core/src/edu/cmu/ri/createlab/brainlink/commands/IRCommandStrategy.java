@@ -21,6 +21,7 @@ public class IRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommand
       this.command[this.command.length - 1] = repeatCommandByte2;
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

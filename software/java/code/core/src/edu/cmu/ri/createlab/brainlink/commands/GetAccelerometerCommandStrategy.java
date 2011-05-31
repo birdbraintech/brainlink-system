@@ -1,7 +1,7 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
+import edu.cmu.ri.createlab.serial.SerialDeviceCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
@@ -18,18 +18,20 @@ public final class GetAccelerometerCommandStrategy extends CreateLabSerialDevice
     */
    private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 4;
 
+   @Override
    protected int getSizeOfExpectedResponse()
       {
       return SIZE_IN_BYTES_OF_EXPECTED_RESPONSE;
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return COMMAND.clone();
       }
 
    @Override
-   public int[] convertResponse(final SerialPortCommandResponse result)
+   public int[] convertResponse(final SerialDeviceCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

@@ -21,6 +21,7 @@ public class DACCommandStrategy extends CreateLabSerialDeviceNoReturnValueComman
                                 (byte)dacValue};
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

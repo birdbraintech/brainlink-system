@@ -16,18 +16,19 @@ public class SendRawIRCommandStrategy extends CreateLabSerialDeviceNoReturnValue
 
    public SendRawIRCommandStrategy(final int[] signal, final int repeatTime)
       {
-          this.command = new byte[signal.length*2+3];
-          this.command[0] = COMMAND_PREFIX;
-          int j = 1;
-          for(int i = 0; i < signal.length; i++) {
-              this.command[j] = getHighByteFromInt(signal[i]);
-              j++;
-              this.command[j] = getLowByteFromInt(signal[i]);
-              j++;
-      }
-          this.command[j] = getHighByteFromInt(repeatTime);
-          j++;
-          this.command[j] = getLowByteFromInt(repeatTime);
+      this.command = new byte[signal.length * 2 + 3];
+      this.command[0] = COMMAND_PREFIX;
+      int j = 1;
+      for (int i = 0; i < signal.length; i++)
+         {
+         this.command[j] = getHighByteFromInt(signal[i]);
+         j++;
+         this.command[j] = getLowByteFromInt(signal[i]);
+         j++;
+         }
+      this.command[j] = getHighByteFromInt(repeatTime);
+      j++;
+      this.command[j] = getLowByteFromInt(repeatTime);
       }
 
    private byte getHighByteFromInt(final int val)
@@ -40,6 +41,7 @@ public class SendRawIRCommandStrategy extends CreateLabSerialDeviceNoReturnValue
       return (byte)((val << 24) >> 24);
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

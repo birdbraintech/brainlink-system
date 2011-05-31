@@ -16,18 +16,21 @@ public class DigitalOutputCommandStrategy extends CreateLabSerialDeviceNoReturnV
 
    public DigitalOutputCommandStrategy(final int whichOutput, final Boolean OutputValue)
       {
-          if(OutputValue) {
-              this.command = new byte[]{COMMAND_PREFIX,
-                                        (byte)whichOutput,
-                                        '1'};
-          }
-          else {
-              this.command = new byte[]{COMMAND_PREFIX,
-                                        (byte)whichOutput,
-                                        '0'};              
-          }
+      if (OutputValue)
+         {
+         this.command = new byte[]{COMMAND_PREFIX,
+                                   (byte)whichOutput,
+                                   '1'};
+         }
+      else
+         {
+         this.command = new byte[]{COMMAND_PREFIX,
+                                   (byte)whichOutput,
+                                   '0'};
+         }
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();

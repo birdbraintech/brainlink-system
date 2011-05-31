@@ -1,7 +1,7 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceReturnValueCommandStrategy;
-import edu.cmu.ri.createlab.serial.SerialPortCommandResponse;
+import edu.cmu.ri.createlab.serial.SerialDeviceCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
 /**
@@ -15,17 +15,20 @@ public final class GetPhotoresistorCommandStrategy extends CreateLabSerialDevice
    /** The size of the expected response, in bytes */
    private static final int SIZE_IN_BYTES_OF_EXPECTED_RESPONSE = 1;
 
+   @Override
    protected int getSizeOfExpectedResponse()
       {
       return SIZE_IN_BYTES_OF_EXPECTED_RESPONSE;
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return COMMAND.clone();
       }
 
-   public Integer convertResponse(final SerialPortCommandResponse result)
+   @Override
+   public Integer convertResponse(final SerialDeviceCommandResponse result)
       {
       if (result != null && result.wasSuccessful())
          {

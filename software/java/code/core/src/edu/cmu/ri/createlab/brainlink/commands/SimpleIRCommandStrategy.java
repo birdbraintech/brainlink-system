@@ -17,6 +17,7 @@ public class SimpleIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueC
       this.command = new byte[]{COMMAND_PREFIX, command, 0x0, 0x0};
       }
 
+   @Override
    protected byte[] getCommand()
       {
       return command.clone();
