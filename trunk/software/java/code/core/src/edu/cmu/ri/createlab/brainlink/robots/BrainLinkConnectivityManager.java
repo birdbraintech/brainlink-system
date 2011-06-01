@@ -1,8 +1,8 @@
 package edu.cmu.ri.createlab.brainlink.robots;
 
 import java.util.SortedSet;
+import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.BrainLinkProxy;
-import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
 import edu.cmu.ri.createlab.device.connectivity.BaseCreateLabDeviceConnectivityManager;
 import edu.cmu.ri.createlab.serial.SerialPortEnumerator;
 import org.apache.log4j.Logger;
@@ -10,11 +10,11 @@ import org.apache.log4j.Logger;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivityManager
+final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivityManager<BrainLink>
    {
    private static final Logger LOG = Logger.getLogger(BrainLinkConnectivityManager.class);
 
-   protected CreateLabDeviceProxy scanForDeviceAndCreateProxy()
+   protected BrainLink scanForDeviceAndCreateProxy()
       {
       LOG.debug("BrainLinkConnectivityManager.scanForDeviceAndCreateProxy()");
 
@@ -41,7 +41,7 @@ final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivity
                LOG.debug("BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): checking serial port [" + portName + "]");
                }
 
-            final CreateLabDeviceProxy proxy = BrainLinkProxy.create(portName);
+            final BrainLink proxy = BrainLinkProxy.create(portName);
 
             if (proxy == null)
                {
