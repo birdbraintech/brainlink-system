@@ -144,7 +144,7 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @param PWMfrequency the frequency of the PWM signal in Hertz.
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   boolean setPWM(final byte port, final int dutyCycle, final int PWMfrequency);
+   boolean setPWM(final int port, final int dutyCycle, final int PWMfrequency);
 
    /**
     * Sets the voltage of one of the two DAC ports
@@ -153,7 +153,7 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @param value the value, in milliVolts, to set the DAC to.
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   boolean setDAC(final byte port, final int value);
+   boolean setDAC(final int port, final int value);
 
    /**
     *  Sets the baud rate of the auxiliary serial port. Only the baud rate is configurable. The serial port always uses

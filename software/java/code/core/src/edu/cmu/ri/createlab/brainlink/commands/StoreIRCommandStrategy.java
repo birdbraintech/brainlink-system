@@ -17,7 +17,7 @@ public class StoreIRCommandStrategy extends CreateLabSerialDeviceNoReturnValueCo
    public StoreIRCommandStrategy(final int whichSignal)
       {
       this.command = new byte[]{COMMAND_PREFIX,
-                                (byte)whichSignal};
+                                (byte)(whichSignal+48)};
       }
 
    @Override

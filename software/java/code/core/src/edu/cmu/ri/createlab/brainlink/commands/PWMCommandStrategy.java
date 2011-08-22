@@ -10,19 +10,22 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStra
 public class PWMCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
    {
    /** The command character used to set one of Brainlink's PWM ports. */
-   private static final byte COMMAND_PREFIX = 'p';
+   private static final byte COMMAND_PREFIX = 'P';
 
    private final byte[] command;
 
-   public PWMCommandStrategy(final byte whichPWM, final int pwmDuty, final int pwmFrequency)
+   public PWMCommandStrategy(final int whichPWM, final int pwmDuty, final int pwmFrequency)
       {
+
+         int pwmPER = 32000000/pwmFrequency - 1;   // Calculate the Period based on desired frequency
+         int trueDuty = pwmPER*pwmDuty/1000;       // Calculate the real duty cycle based on desired duty cycle                                                   
       this.command = new byte[]{COMMAND_PREFIX,
-                                whichPWM,
-                                getHighByteFromInt(pwmDuty),
-                                getLowByteFromInt(pwmDuty),
-                                'P',
-                                getHighByteFromInt(pwmFrequency),
-                                getLowByteFromInt(pwmFrequency)};
+                                getHighByteFromInt(pwmPER),
+                                getLowByteFromInt(pwmPER),
+                                'p',
+                                (byte)(whichPWM+48),
+                                getHighByteFromInt(trueDuty),
+                                getLowByteFromInt(trueDuty)};
       }
 
    private byte getHighByteFromInt(final int val)

@@ -14,11 +14,12 @@ public class DACCommandStrategy extends CreateLabSerialDeviceNoReturnValueComman
 
    private final byte[] command;
 
-   public DACCommandStrategy(final byte whichDAC, final int dacValue)
+   public DACCommandStrategy(final int whichDAC, final int dacValue)
       {
+          byte trueDacValue = (byte)(dacValue*255/3300); // Convert from millivolts to 8-bit range
       this.command = new byte[]{COMMAND_PREFIX,
-                                whichDAC,
-                                (byte)dacValue};
+                                (byte)(whichDAC+48),
+                                trueDacValue};
       }
 
    @Override

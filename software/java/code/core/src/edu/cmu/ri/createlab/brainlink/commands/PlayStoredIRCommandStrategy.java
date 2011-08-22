@@ -17,7 +17,7 @@ public class PlayStoredIRCommandStrategy extends CreateLabSerialDeviceNoReturnVa
    public PlayStoredIRCommandStrategy(final int whichSignal, final int repeatTime)
       {
       this.command = new byte[]{COMMAND_PREFIX,
-                                (byte)whichSignal,
+                                (byte)(whichSignal+48),
                                 getHighByteFromInt(repeatTime), getLowByteFromInt(repeatTime)};
       }
 

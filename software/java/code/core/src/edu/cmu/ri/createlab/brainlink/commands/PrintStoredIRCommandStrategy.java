@@ -12,7 +12,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 public class PrintStoredIRCommandStrategy extends CreateLabSerialDeviceVariableLengthReturnValueCommandStrategy<int[]>
    {
    /** The command character used to print over bluetooth a stored IR signal. */
-   private static final byte COMMAND_PREFIX = 'r';
+   private static final byte COMMAND_PREFIX = 'g';
    private final byte[] command;
 
    public PrintStoredIRCommandStrategy(final int whichSignal)
@@ -52,7 +52,7 @@ public class PrintStoredIRCommandStrategy extends CreateLabSerialDeviceVariableL
             // Assumes the first byte holds the length of the response
             for (int i = 1; i < responseData[0]; i += 2)
                {
-               signalTimesInMS[j] = (ByteUtils.unsignedByteToInt(responseData[i]) << 8 + ByteUtils.unsignedByteToInt(responseData[i + 1])) * 2;
+               signalTimesInMS[j] = (ByteUtils.unsignedByteToInt(responseData[i]) * 256 + ByteUtils.unsignedByteToInt(responseData[i + 1])) * 2;
                j++;
                }
             return signalTimesInMS;
