@@ -18,7 +18,7 @@ public final class SetAuxSerialConfigurationCommandStrategy extends CreateLabSer
       {
       if (baudRate >= 9600)
          {
-         int baud = (int)((1 / ((double)baudRate * 16 / 32000000 - 1)) * 16);
+         int baud = (32000000/baudRate - 16);
          byte scale = -4;
          this.command = new byte[]{COMMAND_PREFIX,
                                    getHighByteFromInt(baud),
@@ -26,7 +26,7 @@ public final class SetAuxSerialConfigurationCommandStrategy extends CreateLabSer
          }
       else
          {
-         int baud = (int)((32000000 / baudRate * 16 - 1));
+         int baud = (int)((32000000 / (baudRate * 16) - 1));
          byte scale = 0;
          this.command = new byte[]{COMMAND_PREFIX,
                                    getHighByteFromInt(baud),

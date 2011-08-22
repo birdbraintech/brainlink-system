@@ -16,9 +16,10 @@ public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoRet
 
    public AuxSerialTransmitCommandStrategy(final byte[] bytesToTransmit)
       {
-      this.command = new byte[bytesToTransmit.length + 1];
+      this.command = new byte[bytesToTransmit.length + 2];
       this.command[0] = COMMAND_PREFIX;
-      System.arraycopy(bytesToTransmit, 0, this.command, 1, bytesToTransmit.length);
+      this.command[1] = (byte)bytesToTransmit.length;
+      System.arraycopy(bytesToTransmit, 0, this.command, 2, bytesToTransmit.length);
       }
 
    @Override

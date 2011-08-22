@@ -328,12 +328,12 @@ public final class BrainLinkProxy implements BrainLink
       return integerReturnValueCommandExecutor.execute(getThermistorCommandStrategy);
       }
 
-   public boolean setPWM(final byte port, final int dutyCycle, final int PWMfrequency)
+   public boolean setPWM(final int port, final int dutyCycle, final int PWMfrequency)
       {
       return noReturnValueCommandExecutor.execute(new PWMCommandStrategy(port, dutyCycle, PWMfrequency));
       }
 
-   public boolean setDAC(final byte port, final int value)
+   public boolean setDAC(final int port, final int value)
       {
       return noReturnValueCommandExecutor.execute(new DACCommandStrategy(port, value));
       }

@@ -44,10 +44,10 @@ public class RecordIRCommandStrategy extends CreateLabSerialDeviceVariableLength
             final int[] signalTimesInMS = new int[numValues];
             int j = 0;
             // Assumes the first byte holds the length of the response
-            for (int i = 1; i < responseData[0]; i += 2)
+            for (int i = 1; i < getSizeOfVariableLengthResponse(responseData)+1; i += 2)
                {
-               signalTimesInMS[j] = (ByteUtils.unsignedByteToInt(responseData[i]) << 8 + ByteUtils.unsignedByteToInt(responseData[i + 1])) * 2;
-               j++;
+               signalTimesInMS[j] = (ByteUtils.unsignedByteToInt(responseData[i]) *256 + ByteUtils.unsignedByteToInt(responseData[i + 1])) * 2;
+                   j++;
                }
             return signalTimesInMS;
             }

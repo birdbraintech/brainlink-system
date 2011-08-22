@@ -21,7 +21,7 @@ public class DigitalInputCommandStrategy extends CreateLabSerialDeviceReturnValu
 
    public DigitalInputCommandStrategy(final int whichIO)
       {
-      this.command = new byte[]{COMMAND_PREFIX, (byte)whichIO};
+      this.command = new byte[]{COMMAND_PREFIX, (byte)(whichIO+48)};
       }
 
    @Override

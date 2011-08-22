@@ -17,9 +17,10 @@ public final class PlayToneCommandStrategy extends CreateLabSerialDeviceNoReturn
    public PlayToneCommandStrategy(final int frequency)
       {
       final int cleanedFrequency = MathUtils.ensureRange(frequency, BrainLinkConstants.TONE_MIN_FREQUENCY, BrainLinkConstants.TONE_MAX_FREQUENCY);
-      this.command = new byte[]{COMMAND_PREFIX,
-                                getHighByteFromInt(cleanedFrequency),
-                                getLowByteFromInt(cleanedFrequency)};
+          final int ccaValue = 62500/cleanedFrequency-1;
+          this.command = new byte[]{COMMAND_PREFIX,
+                                getHighByteFromInt(ccaValue),
+                                getLowByteFromInt(ccaValue)};
       }
 
    private byte getHighByteFromInt(final int val)
