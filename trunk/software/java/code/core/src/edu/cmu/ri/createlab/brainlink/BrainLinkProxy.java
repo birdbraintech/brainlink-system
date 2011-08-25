@@ -86,7 +86,7 @@ public final class BrainLinkProxy implements BrainLink
       try
          {
          // create the serial port command queue
-         final SerialDeviceCommandExecutionQueue commandQueue = SerialDeviceCommandExecutionQueue.create(APPLICATION_NAME, config);
+         final SerialDeviceCommandExecutionQueue commandQueue = SerialDeviceCommandExecutionQueue.create(APPLICATION_NAME, config, 0, null);
 
          // see whether its creation was successful
          if (commandQueue == null)

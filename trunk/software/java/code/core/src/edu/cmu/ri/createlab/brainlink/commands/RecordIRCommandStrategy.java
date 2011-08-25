@@ -4,6 +4,8 @@ import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceVariableLengthReturnValu
 import edu.cmu.ri.createlab.serial.SerialDeviceCommandResponse;
 import edu.cmu.ri.createlab.util.ByteUtils;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by IntelliJ IDEA.
  * User: tlauwers
@@ -13,6 +15,10 @@ public class RecordIRCommandStrategy extends CreateLabSerialDeviceVariableLength
    {
    /** The command character used to record an IR signal and print that signal over bluetooth. */
    private static final byte[] COMMAND = {'R'};
+
+   public RecordIRCommandStrategy() {
+       super(5, TimeUnit.SECONDS);
+   }
 
    protected byte[] getCommand()
       {
