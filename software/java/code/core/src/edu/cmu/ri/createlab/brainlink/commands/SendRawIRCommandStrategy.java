@@ -16,9 +16,10 @@ public class SendRawIRCommandStrategy extends CreateLabSerialDeviceNoReturnValue
 
    public SendRawIRCommandStrategy(final int[] signal, final int repeatTime)
       {
-      this.command = new byte[signal.length * 2 + 3];
+      this.command = new byte[signal.length * 2 + 4];
       this.command[0] = COMMAND_PREFIX;
-      int j = 1;
+      this.command[1] = getLowByteFromInt(signal.length);
+      int j = 2;
       for (int i = 0; i < signal.length; i++)
          {
          this.command[j] = getHighByteFromInt(signal[i]);
