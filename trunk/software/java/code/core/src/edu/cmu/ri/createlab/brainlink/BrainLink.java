@@ -204,8 +204,17 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean turnOffSpeaker();
 
    /**
+    * Uses the Initialization data stored in an encoded file to initialize the Brainlink's IR transmitter. A number of encoded
+    * files for popular robot platforms are provided in the "devices" directory, and you can make your own with the "StoreAndPlayEncodedSignals" utility.
+    * The filename argument should not include the ".encsig" file name extension - this is automatically appended.
+    *
+    * @param fileName The name of the file with Initialization data.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   boolean initializeIR(String fileName);
+
+   /**
     * Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.
-    * Currently used by specific robot classes.
     *
     * @param initializationBytes The bytes to send the Brainlink to configure it with a specific IR communication protocol.
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
@@ -224,7 +233,19 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean turnOffIR();
 
    /**
-    * Sends a specific IR command.  Currently used by the specific robot classes.
+    *  Sends the signal stored in fileName to Brainlink for transmission over IR. Handles both encoded and raw signal
+    *  files - if encoded is true, then it looks for fileName.encsig in the devices directory, and transmits the signal
+    *  if it has been previously initialized with initializeIR.
+    *  If encoded is false, it looks for fileName.rawsig and sends that data instead.
+     * @param fileName The file holding the signal
+    * @param signalName The name of the signal
+    * @param encoded Whether the file is encoded or raw format
+    * @return
+    */
+   boolean transmitIRSignal(String fileName, String signalName, boolean encoded);
+
+   /**
+    * Used by transmitIRSignal if encoded is true. Sends an encoded IR command.
     *
     * @param commandStrategy An array of bytes encoding the command to send
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
@@ -260,7 +281,7 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean playIR(final int position, final int repeatTime);
 
    /**
-    *  Sends a "Raw" IR signal to transmit over the tether's IR LED.
+    *  Used by transmitIRSignal. Sends a "Raw" format IR signal to transmit over the tether's IR LED.
     *
     * @param signal the raw IR signal consisting of time measurements.
     * @param repeatTime the amount of delay, in milliseconds, between successive signals. Use 0 if the signal should not repeat.
