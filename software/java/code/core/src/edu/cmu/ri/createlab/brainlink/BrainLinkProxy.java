@@ -56,6 +56,7 @@ import edu.cmu.ri.createlab.serial.config.FlowControl;
 import edu.cmu.ri.createlab.serial.config.Parity;
 import edu.cmu.ri.createlab.serial.config.SerialIOConfiguration;
 import edu.cmu.ri.createlab.serial.config.StopBits;
+import edu.cmu.ri.createlab.util.ByteUtils;
 import edu.cmu.ri.createlab.util.commandexecution.CommandExecutionFailureHandler;
 import edu.cmu.ri.createlab.util.thread.DaemonThreadFactory;
 import org.apache.log4j.Level;
@@ -162,7 +163,7 @@ public final class BrainLinkProxy implements BrainLink
    private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLinkProxy.peerPingScheduler"));
    private final ScheduledFuture<?> peerPingScheduledFuture;
    private final Collection<CreateLabDevicePingFailureEventListener> createLabDevicePingFailureEventListeners = new HashSet<CreateLabDevicePingFailureEventListener>();
-   private String initializeFileName ="";
+   private BrainLinkFileManipulator deviceFile;
 
    private BrainLinkProxy(final SerialDeviceCommandExecutionQueue commandQueue, final String serialPortName)
       {
@@ -426,143 +427,66 @@ public final class BrainLinkProxy implements BrainLink
       return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
       }
 
-   public boolean initializeIR(String fileName)
+   public boolean initializeDevice(String fileName, boolean encoded)
       {
-          try {
-              // Open the file for reading
-              String fileLocation = "../devices/" + fileName + ".encsig";
-              Scanner scanner = new Scanner(new FileInputStream(fileLocation), "UTF-8");
-              scanner.useDelimiter(";");
-              // Get the initialization line (without the word Initialization;)
-              scanner.findWithinHorizon(("Initialization;"), 0);
-              String initLine = scanner.nextLine();
-              // Split the data into an array of strings
-              String [] initData = initLine.split(";");
+          deviceFile = new BrainLinkFileManipulator(fileName, encoded);
 
-              // Create the initialization array
-              byte [] initCommandData = new byte[initData.length];
-              // Turns the string array into a byte array
-              for(int i = 0; i < initData.length; i++) {
-                  initCommandData[i] = Byte.valueOf(initData[i]);
-              }
+          if(deviceFile.isEmpty()) {
+              System.out.println("Error, this file does not exist or is empty");
+              return false;
+          }
 
-              // Send initialization to Brainlink
-              if(initializeIR(initCommandData)) {
-                  // If successful, set initialization file name to the current file name
-                  initializeFileName = fileName;
-                  scanner.close();
-                  return true;
-              }
-              else {
-                  scanner.close();
+          if(encoded) {
+              byte [] initData = deviceFile.getInitialization();
+              if(initData == null) {
+                  System.out.println("Error: No initialization in this encoded file");
                   return false;
               }
-
+              else {
+                  initializeIR(initData);
+                  return true;
+              }
           }
-          catch (FileNotFoundException e) {
-              System.out.println("initializeIR Warning: No file by that name");
-              return false;
-          }
-          catch(IOException e) {
-              System.out.println("initializeIR Warning: Failed to read, generic IO Exception");
-              return false;
-          }
-
+          return true;
       }
-       
-   public boolean transmitIRSignal(String fileName, String signalName, boolean encoded)
+       // Maybe split this into two functions so as to take advantage of the new functions for getting data
+       // With the BrainLinkFileManipulator
+   public boolean transmitIRSignal(String signalName)
       {
-          // If the file is encoded, do the following:
-          if(encoded) {
-              try {
-                  // Make sure the Brainlink has been initialized with the IR data in this file. If not, don't send a signal.
-                if(!fileName.equals(initializeFileName))  {
-                    System.out.println("transmitIRSignal Warning: The fileName provided has not been initialized. Call initializeIR");
-                    return false;
-                }
-                  // Open the file for reading
-                String fileLocation = "../devices/" + fileName + ".encsig";
-                Scanner scanner = new Scanner(new FileInputStream(fileLocation), "UTF-8");
-                scanner.useDelimiter(";");
-
-                  // Make sure the signal is there, otherwise, complain and exit
-                if(scanner.findWithinHorizon((signalName+";"), 0)==null) {
-                    System.out.println("transmitIRSignal Warning: Did not find signal name in file");
-                    scanner.close();
-                    return false;
-                }
-
-                  // The scanner is now just past the name of the signal, so a call to nextLine returns all of the numeric data for the signal
-                  // Split is into an array of strings where each string is a number
-                String signalLine = scanner.nextLine();
-                String [] signalData = signalLine.split(";");
-
-                // Create the initialization array and send the command to the Brainlink
-                byte [] signalCommandData = new byte[signalData.length-2];
-                int dataCount = 0;
-                  // Turn each string into a byte
-                for(dataCount = 0; dataCount < signalData.length-2; dataCount++) {
-                    signalCommandData[dataCount] = Byte.valueOf(signalData[dataCount]);
-                    System.out.println(dataCount);
-                }
-                  // Now get the repeat time bytes at the end of the signal
-                byte repeat1 = Byte.valueOf(signalData[dataCount]);
-                dataCount++;
-                byte repeat2 = Byte.valueOf(signalData[dataCount]);
-
-                  // Tell Brainlink to send the IR command, hopefully successfully!
-                boolean returnVal = sendIRCommand(new IRCommandStrategy(signalCommandData, repeat1, repeat2));
-                scanner.close();
-                return returnVal;
-            }
-            catch (FileNotFoundException e) {
-                System.out.println("transmitIRSignal Warning: No file by that name");
-                return false;
-            }
-            catch(IOException e) {
-                System.out.println("transmitIRSignal Warning: Failed to read, generic IO Exception");
-                return false;
-            }
+           if(!deviceFile.containsSignal(signalName)) {
+              System.out.println("Error: signal not contained in file");
+              return false;
           }
-          // If not encoded, get data from the .rawsig file
+
+          int[] signalValues = deviceFile.getSignalValues(signalName);
+          int repeatTime = deviceFile.getSignalRepeatTime(signalName);
+
+          if(deviceFile.isEncoded())
+          {
+              byte [] signalInBytes = new byte[signalValues.length];
+              for(int i = 0; i < signalValues.length; i++) {
+                signalInBytes[i] =  (byte)signalValues[i];
+              }
+              byte repeat1 = getHighByteFromInt(repeatTime);
+              byte repeat2 = getLowByteFromInt(repeatTime);
+              return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
+          }
           else
           {
-             try {
-                 // Open the file for reading
-                String fileLocation = "../devices/" + fileName + ".rawsig";
-                Scanner scanner = new Scanner(new FileInputStream(fileLocation), "UTF-8");
-                scanner.useDelimiter(";");
-                 // Make sure the signal exists in the file
-                if(scanner.findWithinHorizon(signalName, 0)==null) {
-                    System.out.println("transmitIRSignal Warning: Did not find signal name in file");
-                    scanner.close();
-                    return false;
-                }
-                 // Read in all the raw data values as integers
-                int signalLength = scanner.nextInt();
-                int[] signal = new int[signalLength];
-                for(int i = 0; i < signalLength; i++) {
-                    signal[i] = scanner.nextInt();
-                }
-                // Last integer is the repeat time
-                int repeat = scanner.nextInt();
-                 // Transmit the data to Brainlink
-                boolean returnVal = sendRawIR(signal, repeat);
-                scanner.close();
-                return returnVal;
-            }
-            catch (FileNotFoundException e) {
-                System.out.println("transmitIRSignal Warning: No file by that name");
-                return false;
-            }
-            catch(IOException e) {
-                System.out.println("transmitIRSignal Warning: Failed to read, generic IO Exception");
-                return false;
-            }
-
+              return sendRawIR(signalValues, repeatTime);
           }
       }
- 
+
+   private byte getHighByteFromInt(final int val)
+      {
+      return (byte)((val << 16) >> 24);
+      }
+
+   private byte getLowByteFromInt(final int val)
+      {
+      return (byte)((val << 24) >> 24);
+      }
+
    public void disconnect()
       {
       disconnect(true);
