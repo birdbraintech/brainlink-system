@@ -204,14 +204,15 @@ public interface BrainLink extends CreateLabDeviceProxy
    boolean turnOffSpeaker();
 
    /**
-    * Uses the Initialization data stored in an encoded file to initialize the Brainlink's IR transmitter. A number of encoded
+    * Opens the device file specified by fileName and initializes the IR if the file is encoded. A number of encoded
     * files for popular robot platforms are provided in the "devices" directory, and you can make your own with the "StoreAndPlayEncodedSignals" utility.
-    * The filename argument should not include the ".encsig" file name extension - this is automatically appended.
+    * The filename argument should not include the ".encsig" or ".rawsig" file name extensions - this is automatically appended.
     *
     * @param fileName The name of the file with Initialization data.
+    * @param encoded If the file is encoded or raw
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   boolean initializeIR(String fileName);
+   boolean initializeDevice(String fileName, boolean encoded);
 
    /**
     * Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.
@@ -234,15 +235,11 @@ public interface BrainLink extends CreateLabDeviceProxy
 
    /**
     *  Sends the signal stored in fileName to Brainlink for transmission over IR. Handles both encoded and raw signal
-    *  files - if encoded is true, then it looks for fileName.encsig in the devices directory, and transmits the signal
-    *  if it has been previously initialized with initializeIR.
-    *  If encoded is false, it looks for fileName.rawsig and sends that data instead.
-     * @param fileName The file holding the signal
+    *  files.
     * @param signalName The name of the signal
-    * @param encoded Whether the file is encoded or raw format
-    * @return
+    * @return true if transmission succeeded
     */
-   boolean transmitIRSignal(String fileName, String signalName, boolean encoded);
+   boolean transmitIRSignal(String signalName);
 
    /**
     * Used by transmitIRSignal if encoded is true. Sends an encoded IR command.
