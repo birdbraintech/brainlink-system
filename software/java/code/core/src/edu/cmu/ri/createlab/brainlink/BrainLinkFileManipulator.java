@@ -5,6 +5,7 @@ import edu.cmu.ri.createlab.util.ByteUtils;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -172,6 +173,11 @@ public class BrainLinkFileManipulator {
         fileDirectory = location;
     }
 
+    public String getFileLocation()
+    {
+        return fileLocation;
+    }
+
     public String[] getSignalNames()
     {
          if(updateData) {
@@ -224,7 +230,7 @@ public class BrainLinkFileManipulator {
             System.out.println("Warning, file has no initialization. Maybe it's raw instead of encoded?");
             return null;
         }
-        String [] returnData = new String[(initData.length+2)/2];
+        String [] returnData = new String[(initData.length+1)/2];
 
         returnData[0] = Integer.toString((32000000/(initData[0] * 256 + initData[1])));
         int startUpPulseLength = initData[2]*2;
@@ -250,8 +256,8 @@ public class BrainLinkFileManipulator {
         returnData[3] = Integer.toString(initData[5+startUpPulseLength] * 256 + initData[6+startUpPulseLength]);
         returnData[4] = Integer.toString(initData[7+startUpPulseLength] * 256 + initData[8+startUpPulseLength]);
         returnData[5] = Integer.toString(initData[9+startUpPulseLength] * 256 + initData[10+startUpPulseLength]);
-        for(int i = 0; i < startUpPulseLength; i++) {
-            returnData[i+6] = Integer.toString(initData[2+i*2] * 256 + initData[3+i*2]);
+        for(int i = 0; i < initData[2]; i++) {
+            returnData[i+6] = Integer.toString(initData[3+i*2] * 256 + initData[4+i*2]);
         }
         return returnData;
     }
@@ -327,16 +333,21 @@ public class BrainLinkFileManipulator {
            while(scanner.hasNext()) {
               temp = scanner.nextLine();
               semiColonIndex = temp.indexOf(";");
-              signalName = temp.substring(0, semiColonIndex);
-               // Get just the signals
-              temp = temp.substring(semiColonIndex+1);
-               // Split into a whole bunch of strings, each representing a signal
-              String[] signalValues = temp.split(";");
-              int[] signalValuesAsInts = new int[signalValues.length];
-               for(int i = 0; i < signalValues.length; i++) {
-                   signalValuesAsInts[i] = Integer.valueOf(signalValues[i]);
-               }
-               fileContents.put(signalName, signalValuesAsInts);
+              if(semiColonIndex > 0) {
+                  signalName = temp.substring(0, semiColonIndex);
+                   // Get just the signals
+                  temp = temp.substring(semiColonIndex+1);
+                   // Split into a whole bunch of strings, each representing a signal
+                  String[] signalValues = temp.split(";");
+                  int[] signalValuesAsInts = new int[signalValues.length];
+                   for(int i = 0; i < signalValues.length; i++) {
+                       signalValuesAsInts[i] = Integer.valueOf(signalValues[i]);
+                       if(signalValuesAsInts[i] < 0) {
+                            signalValuesAsInts[i] += 256;
+                       }
+                   }
+                   fileContents.put(signalName, signalValuesAsInts);
+              }
            }
            return true;
            
