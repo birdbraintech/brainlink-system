@@ -11,12 +11,17 @@ import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
 public interface BrainLink extends CreateLabDeviceProxy
    {
    /**
-    * Returns the current battery voltage; returns <code>null</code> if the voltage could not be read.
+    * Returns the current battery voltage in millivolts; returns <code>null</code> if the voltage could not be read.
     *
-    * @return The raw battery voltage reading
+    * @return The battery voltage reading
     */
    Integer getBatteryVoltage();
 
+   /**
+    * Returns true if the battery reads low (less than 3500 millivolts), false otherwise
+    * @return Low battery status
+    */
+   boolean isBatteryLow();
    /**
     * Sets the color of the LED in the Brainlink.  The LED can be any color that can be created by mixing red, green,
     * and blue; turning on all three colors in equal amounts results in white light.  Valid ranges for the red, green,
@@ -179,13 +184,6 @@ public interface BrainLink extends CreateLabDeviceProxy
     * so in high-data transfer applications this must be checked frequently.
     */
    int[] receiveBytesOverSerial();
-
-   /**
-    * Returns the thermistor value; returns <code>null</code> if the thermistor could not be read.
-    *
-    * @return The raw temperature value of the internal thermometer
-    */
-   Integer getThermistor();
 
    /**
     * Plays a tone specified at the frequency in hertz specified by frequency.  Tone will not stop until turnOffSpeaker

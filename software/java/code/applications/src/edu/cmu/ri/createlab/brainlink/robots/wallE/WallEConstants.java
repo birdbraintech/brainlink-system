@@ -21,7 +21,7 @@ final class WallEConstants
       private static final byte[] DRIVE_FORWARD_ONCE = new byte[]{ByteUtils.intToUnsignedByte(0xAA), ByteUtils.intToUnsignedByte(0xEA), ByteUtils.intToUnsignedByte(0xE8)};
       private static final byte[] DRIVE_FORWARD = new byte[]{ByteUtils.intToUnsignedByte(0xAF), ByteUtils.intToUnsignedByte(0xEF), ByteUtils.intToUnsignedByte(0xE8)};
       private static final byte[] TURN_LEFT = new byte[]{ByteUtils.intToUnsignedByte(0xAF), ByteUtils.intToUnsignedByte(0xDF), ByteUtils.intToUnsignedByte(0xD8)};
-      private static final byte[] SMALL_LEFT_TURN = new byte[]{ByteUtils.intToUnsignedByte(0xCA), ByteUtils.intToUnsignedByte(0xCA), ByteUtils.intToUnsignedByte(0xC8)};
+      private static final byte[] SMALL_LEFT_TURN = new byte[]{ByteUtils.intToUnsignedByte(0xAA), ByteUtils.intToUnsignedByte(0xCA), ByteUtils.intToUnsignedByte(0xC8)};
       private static final byte[] MEDIUM_LEFT_TURN = new byte[]{ByteUtils.intToUnsignedByte(0xAA), ByteUtils.intToUnsignedByte(0xDA), ByteUtils.intToUnsignedByte(0xD8)};
       private static final byte[] LARGE_LEFT_TURN = new byte[]{ByteUtils.intToUnsignedByte(0xAA), ByteUtils.intToUnsignedByte(0xBA), ByteUtils.intToUnsignedByte(0xB8)};
       private static final byte[] SPECIAL_TURN = new byte[]{ByteUtils.intToUnsignedByte(0xAA), 0x5A, 0x58};

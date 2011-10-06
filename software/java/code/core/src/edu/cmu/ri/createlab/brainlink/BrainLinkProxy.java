@@ -213,8 +213,22 @@ public final class BrainLinkProxy implements BrainLink
 
    public Integer getBatteryVoltage()
       {
-      return integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy);
+          // Converts from 8 bit ADC to battery voltage in millivolts
+      return (integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy)*2650)/128;
+          
       }
+
+   public boolean isBatteryLow()
+   {
+       if(getBatteryVoltage() < 3500)
+       {
+           return true;
+       }
+       else
+       {
+           return false;
+       }
+   }
 
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
@@ -335,11 +349,6 @@ public final class BrainLinkProxy implements BrainLink
    public boolean setDigitalOutput(final int port, final boolean value)
       {
       return noReturnValueCommandExecutor.execute(new DigitalOutputCommandStrategy(port, value));
-      }
-
-   public Integer getThermistor()
-      {
-      return integerReturnValueCommandExecutor.execute(getThermistorCommandStrategy);
       }
 
    public boolean setPWM(final int port, final int dutyCycle, final int PWMfrequency)
@@ -486,6 +495,24 @@ public final class BrainLinkProxy implements BrainLink
       {
       return (byte)((val << 24) >> 24);
       }
+
+
+   public void sleep(int millis)
+   {
+      try
+         {
+         if(millis > 0) {
+          Thread.sleep(millis);
+         }
+         else {
+           System.out.println("Error: sent negative time to sleep");
+         }
+         }
+      catch (InterruptedException e)
+         {
+         System.out.println("Error while sleeping: " + e);
+         }
+   }
 
    public void disconnect()
       {
