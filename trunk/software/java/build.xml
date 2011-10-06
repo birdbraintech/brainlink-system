@@ -183,8 +183,7 @@
             <path refid="brainlink-applications-classpath"/>
          </classpath>
          <!-- Use fileset instead of packageset since it has classes in the default package -->
-         <fileset dir="${brainlink-applications.src.dir}" includes="**/robots/**/*.java"/>
-         <fileset dir="${brainlink-core.src.dir}" includes="**/BrainLink.java"/>
+         <fileset dir="${brainlink-core.src.dir}" includes="**/BrainLink.java,**/BrainLinkFileManipulator.java"/>
          <link href="http://download.oracle.com/javase/6/docs/api/"/>
       </javadoc>
 

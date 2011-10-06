@@ -301,44 +301,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
             }
          };
 
-   private final Runnable getThermistorStateAction =
-         new Runnable()
-         {
-         public void run()
-            {
-            if (isConnected())
-               {
-               println(convertThermistorStateToString());
-               }
-            else
-               {
-               println("You must be connected to the BrainLink first.");
-               }
-            }
-         };
-
-   private final Runnable pollingGetThermistorStateAction =
-         new Runnable()
-         {
-         public void run()
-            {
-            if (isConnected())
-               {
-               poll(
-                     new Runnable()
-                     {
-                     public void run()
-                        {
-                        println(convertThermistorStateToString());
-                        }
-                     });
-               }
-            else
-               {
-               println("You must be connected to the BrainLink first.");
-               }
-            }
-         };
 
    private final Runnable playToneAction =
          new Runnable()
@@ -422,8 +384,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       registerAction("l", getPhotoresistorStateAction);
       registerAction("L", pollingGetPhotoresistorStateAction);
       registerAction("n", getAnalogInputsAction);
-      registerAction("h", getThermistorStateAction);
-      registerAction("H", pollingGetThermistorStateAction);
       registerAction("t", playToneAction);
       registerAction("s", turnOffSpeakerAction);
       registerAction("i", turnOffIRAction);
@@ -542,16 +502,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       return "Analog Inputs: failed to read value";
       }
 
-   private String convertThermistorStateToString()
-      {
-      final Integer rawValue = brainLink.getThermistor();
-      if (rawValue != null)
-         {
-         return "Thermistor: " + rawValue;
-         }
-
-      return "Thermistor: failed to read value";
-      }
 
    protected final BrainLinkProxy connectToBrainlink(final String serialPortName, final CreateLabDevicePingFailureEventListener pingFailureEventListener)
       {
