@@ -1,5 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
+import java.util.concurrent.TimeUnit;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceHandshakeCommandStrategy;
 
 /**
@@ -15,7 +16,7 @@ public final class HandshakeCommandStrategy extends CreateLabSerialDeviceHandsha
 
    public HandshakeCommandStrategy()
       {
-      super(5000, DEFAULT_SLURP_TIMEOUT_MILLIS, DEFAULT_MAX_NUMBER_OF_RETRIES);
+      super(5000, TimeUnit.MILLISECONDS);
       }
 
    @Override
