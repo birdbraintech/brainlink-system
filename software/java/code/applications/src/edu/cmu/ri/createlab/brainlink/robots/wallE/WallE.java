@@ -1,6 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.robots.wallE;
 
-import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
 import org.apache.log4j.Logger;
@@ -26,7 +26,7 @@ public final class WallE extends BaseBrainLinkControllable
       {
       super(serialPortNames);
 
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       if (brainLink != null)
          {
          LOG.debug("WALL-E.WallE(): initializing IR for WALL-E");
@@ -133,13 +133,13 @@ public final class WallE extends BaseBrainLinkControllable
 
    public boolean stop()
       {
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       return brainLink != null && brainLink.turnOffIR();
       }
 
    private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
       {
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       return brainLink != null && brainLink.sendIRCommand(stopCommandStrategy);
       }
 

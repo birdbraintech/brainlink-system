@@ -8,7 +8,7 @@ import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public interface BrainLink extends CreateLabDeviceProxy
+public interface BrainLinkInterface extends CreateLabDeviceProxy
    {
    /**
     * Returns the current battery voltage in millivolts; returns <code>null</code> if the voltage could not be read.
@@ -22,6 +22,7 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @return Low battery status
     */
    boolean isBatteryLow();
+
    /**
     * Sets the color of the LED in the Brainlink.  The LED can be any color that can be created by mixing red, green,
     * and blue; turning on all three colors in equal amounts results in white light.  Valid ranges for the red, green,
@@ -139,7 +140,7 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @param frequency the frequency in Hertz to set the PWM waveform to.
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
- //  boolean configurePWM(final int frequency);
+   //  boolean configurePWM(final int frequency);
 
    /**
     * Sets the duty cycle of one of the two PWM ports.
@@ -255,7 +256,7 @@ public interface BrainLink extends CreateLabDeviceProxy
     *
     * @return An array of time measurements corresponding to an infrared signal.
     */
-   int[]  recordIR();
+   int[] recordIR();
 
    /**
     *  Stores the most recently recorded IR signal to the Brainlink's on-board EEPROM (which survives power cycling).
@@ -292,5 +293,4 @@ public interface BrainLink extends CreateLabDeviceProxy
     * @return An array of time measurements corresponding to an infrared signal, null if invalid.
     */
    int[] printIR(final int position);
-
    }

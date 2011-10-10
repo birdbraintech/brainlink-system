@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.brainlink.robots.BrainLinkSolo;
 
 /**
@@ -32,7 +32,7 @@ public final class BrainLinkBlinkyLED
       int colorIndex = 0;
       while (true)
          {
-         final BrainLink brainLink = brainLinkSolo.getBrainLink();
+         final BrainLinkInterface brainLink = brainLinkSolo.getBrainLink();
          if (brainLink != null)
             {
             brainLink.setFullColorLED(COLORS[colorIndex]);
@@ -58,6 +58,7 @@ public final class BrainLinkBlinkyLED
       // nothing to do
       }
 
+   @SuppressWarnings({"BusyWait"})
    private static boolean sleep(final BufferedReader in, final long millis)
       {
       if (millis > 0)

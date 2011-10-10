@@ -1,6 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.robots.TVRemote;
 
-import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
 import org.apache.log4j.Logger;
@@ -26,7 +26,7 @@ public final class TVRemote extends BaseBrainLinkControllable
       {
       super(serialPortNames);
 
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       if (brainLink != null)
          {
          LOG.debug("TVRemote.TVRemote(): initializing IR for TV");
@@ -161,7 +161,7 @@ public final class TVRemote extends BaseBrainLinkControllable
 
    private boolean executeCommandStrategy(final IRCommandStrategy stopCommandStrategy)
       {
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       return brainLink != null && brainLink.sendIRCommand(stopCommandStrategy);
       }
 

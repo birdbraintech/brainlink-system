@@ -1,6 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.robots;
 
-import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.device.connectivity.ConnectionException;
 import edu.cmu.ri.createlab.serial.SerialPortEnumerator;
@@ -14,7 +14,7 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
    {
    private static final Logger LOG = Logger.getLogger(BaseBrainLinkControllable.class);
 
-   private BrainLink brainLink = null;
+   private BrainLinkInterface brainLink = null;
 
    /**
     * Creates the <code>BaseBrainLinkControllable</code> by attempting to connect to all available serial ports and
@@ -85,7 +85,7 @@ public abstract class BaseBrainLinkControllable implements BrainLinkControllable
          }
       }
 
-   public final BrainLink getBrainLink()
+   public final BrainLinkInterface getBrainLink()
       {
       return brainLink;
       }
