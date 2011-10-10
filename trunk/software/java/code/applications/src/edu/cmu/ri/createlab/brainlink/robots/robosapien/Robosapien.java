@@ -1,6 +1,6 @@
 package edu.cmu.ri.createlab.brainlink.robots.robosapien;
 
-import edu.cmu.ri.createlab.brainlink.BrainLink;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.brainlink.commands.SimpleIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.robots.BaseBrainLinkControllable;
 import org.apache.log4j.Logger;
@@ -17,15 +17,15 @@ public final class Robosapien extends BaseBrainLinkControllable
       this(null);
       }
 
-       /**  Instantiates a Robosapien class
-        *
-        * @param serialPortNames The serial port identified of the Brainlink connected to this computer
-        */
+   /**  Instantiates a Robosapien class
+    *
+    * @param serialPortNames The serial port identified of the Brainlink connected to this computer
+    */
    public Robosapien(final String serialPortNames)
       {
       super(serialPortNames);
 
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       if (brainLink != null)
          {
          LOG.debug("Robosapien.Robosapien(): initializing IR for Robosapien");
@@ -305,7 +305,7 @@ public final class Robosapien extends BaseBrainLinkControllable
 
    private boolean executeCommandStrategy(final SimpleIRCommandStrategy stopCommandStrategy)
       {
-      final BrainLink brainLink = getBrainLink();
+      final BrainLinkInterface brainLink = getBrainLink();
       return brainLink != null && brainLink.sendSimpleIRCommand(stopCommandStrategy);
       }
 

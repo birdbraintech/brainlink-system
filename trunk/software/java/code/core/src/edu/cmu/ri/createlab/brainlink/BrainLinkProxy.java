@@ -1,24 +1,12 @@
 package edu.cmu.ri.createlab.brainlink;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.Scanner;
 import edu.cmu.ri.createlab.brainlink.commands.AuxSerialReceiveCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.AuxSerialTransmitCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.DACCommandStrategy;
@@ -56,7 +44,6 @@ import edu.cmu.ri.createlab.serial.config.FlowControl;
 import edu.cmu.ri.createlab.serial.config.Parity;
 import edu.cmu.ri.createlab.serial.config.SerialIOConfiguration;
 import edu.cmu.ri.createlab.serial.config.StopBits;
-import edu.cmu.ri.createlab.util.ByteUtils;
 import edu.cmu.ri.createlab.util.commandexecution.CommandExecutionFailureHandler;
 import edu.cmu.ri.createlab.util.thread.DaemonThreadFactory;
 import org.apache.log4j.Level;
@@ -65,7 +52,7 @@ import org.apache.log4j.Logger;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class BrainLinkProxy implements BrainLink
+public final class BrainLinkProxy implements BrainLinkInterface
    {
    private static final Logger LOG = Logger.getLogger(BrainLinkProxy.class);
 
@@ -213,22 +200,14 @@ public final class BrainLinkProxy implements BrainLink
 
    public Integer getBatteryVoltage()
       {
-          // Converts from 8 bit ADC to battery voltage in millivolts
-      return (integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy)*2650)/128;
-          
+      // Converts from 8 bit ADC to battery voltage in millivolts
+      return (integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy) * 2650) / 128;
       }
 
    public boolean isBatteryLow()
-   {
-       if(getBatteryVoltage() < 3500)
-       {
-           return true;
-       }
-       else
-       {
-           return false;
-       }
-   }
+      {
+      return getBatteryVoltage() < 3500;
+      }
 
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
@@ -436,54 +415,63 @@ public final class BrainLinkProxy implements BrainLink
       return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
       }
 
-   public boolean initializeDevice(String fileName, boolean encoded)
+   @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
+   public boolean initializeDevice(final String fileName, final boolean encoded)
       {
-          deviceFile = new BrainLinkFileManipulator(fileName, encoded);
+      deviceFile = new BrainLinkFileManipulator(fileName, encoded);
 
-          if(deviceFile.isEmpty()) {
-              System.out.println("Error, this file does not exist or is empty");
-              return false;
-          }
+      if (deviceFile.isEmpty())
+         {
+         System.out.println("Error, this file does not exist or is empty");
+         return false;
+         }
 
-          if(encoded) {
-              byte [] initData = deviceFile.getInitialization();
-              if(initData == null) {
-                  System.out.println("Error: No initialization in this encoded file");
-                  return false;
-              }
-              else {
-                  initializeIR(initData);
-                  return true;
-              }
-          }
-          return true;
+      if (encoded)
+         {
+         final byte[] initData = deviceFile.getInitialization();
+         if (initData == null)
+            {
+            System.out.println("Error: No initialization in this encoded file");
+            return false;
+            }
+         else
+            {
+            initializeIR(initData);
+            return true;
+            }
+         }
+      return true;
       }
-       // Maybe split this into two functions so as to take advantage of the new functions for getting data
-       // With the BrainLinkFileManipulator
-   public boolean transmitIRSignal(String signalName)
+
+   // Maybe split this into two functions so as to take advantage of the new functions for getting data
+   // With the BrainLinkFileManipulator
+   @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
+   public boolean transmitIRSignal(final String signalName)
       {
-           if(!deviceFile.containsSignal(signalName)) {
-              System.out.println("Error: signal not contained in file");
-              return false;
-          }
+      if (!deviceFile.containsSignal(signalName))
+         {
+         System.out.println("Error: signal not contained in file");
+         return false;
+         }
 
-          int[] signalValues = deviceFile.getSignalValues(signalName);
-          int repeatTime = deviceFile.getSignalRepeatTime(signalName);
+      final int[] signalValues = deviceFile.getSignalValues(signalName);
+      final int repeatTime = deviceFile.getSignalRepeatTime(signalName);
 
-          if(deviceFile.isEncoded())
-          {
-              byte [] signalInBytes = new byte[signalValues.length];
-              for(int i = 0; i < signalValues.length; i++) {
-                signalInBytes[i] =  (byte)signalValues[i];
-              }
-              byte repeat1 = getHighByteFromInt(repeatTime);
-              byte repeat2 = getLowByteFromInt(repeatTime);
-              return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
-          }
-          else
-          {
-              return sendRawIR(signalValues, repeatTime);
-          }
+      if (deviceFile.isEncoded())
+         {
+         final byte[] signalInBytes = new byte[signalValues.length];
+         for (int i = 0; i < signalValues.length; i++)
+            {
+            signalInBytes[i] = (byte)signalValues[i];
+            }
+         final byte repeat1 = getHighByteFromInt(repeatTime);
+         final byte repeat2 = getLowByteFromInt(repeatTime);
+         return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
+         }
+      else
+         {
+         return sendRawIR(signalValues, repeatTime);
+         }
       }
 
    private byte getHighByteFromInt(final int val)
@@ -496,23 +484,25 @@ public final class BrainLinkProxy implements BrainLink
       return (byte)((val << 24) >> 24);
       }
 
-
-   public void sleep(int millis)
-   {
+   @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
+   public void sleep(final int millis)
+      {
       try
          {
-         if(millis > 0) {
-          Thread.sleep(millis);
-         }
-         else {
-           System.out.println("Error: sent negative time to sleep");
-         }
+         if (millis > 0)
+            {
+            Thread.sleep(millis);
+            }
+         else
+            {
+            System.out.println("Error: sent negative time to sleep");
+            }
          }
       catch (InterruptedException e)
          {
          System.out.println("Error while sleeping: " + e);
          }
-   }
+      }
 
    public void disconnect()
       {

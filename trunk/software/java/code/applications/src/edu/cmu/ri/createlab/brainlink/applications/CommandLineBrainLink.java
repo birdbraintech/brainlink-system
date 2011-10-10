@@ -3,8 +3,8 @@ package edu.cmu.ri.createlab.brainlink.applications;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.SortedMap;
-import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.BrainLinkConstants;
+import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
 import edu.cmu.ri.createlab.brainlink.BrainLinkProxy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.commandline.SerialDeviceCommandLineApplication;
@@ -26,7 +26,7 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       new CommandLineBrainLink(in).run();
       }
 
-   private BrainLink brainLink;
+   private BrainLinkInterface brainLink;
 
    private CommandLineBrainLink(final BufferedReader in)
       {
@@ -301,7 +301,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
             }
          };
 
-
    private final Runnable playToneAction =
          new Runnable()
          {
@@ -422,6 +421,7 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       println("--------------------------------------------");
       }
 
+   @SuppressWarnings({"BusyWait"})
    protected final void poll(final Runnable strategy)
       {
       final long startTime = System.currentTimeMillis();
@@ -501,7 +501,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
 
       return "Analog Inputs: failed to read value";
       }
-
 
    protected final BrainLinkProxy connectToBrainlink(final String serialPortName, final CreateLabDevicePingFailureEventListener pingFailureEventListener)
       {
