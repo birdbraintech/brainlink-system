@@ -240,6 +240,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
     *  files.
     * @param signalName The name of the signal
     * @return true if transmission succeeded
+    * @throws IllegalStateException if the device has not yet been initialized with a call to {@link #initializeDevice(String, boolean)}
     */
    boolean transmitIRSignal(String signalName);
 
