@@ -1,13 +1,10 @@
 package edu.cmu.ri.createlab.brainlink.commands;
 
-import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
-
 /**
- * Created by IntelliJ IDEA.
- * User: tlauwers
- * Date: May 5, 2011
+ * @author Tom Lauwers (tlauwers@birdbraintechnologies.com)
+ * @author Chris Bartley (bartley@cmu.edu)
  */
-public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoReturnValueCommandStrategy
+public class AuxSerialTransmitCommandStrategy extends ThrottledNoReturnValueCommandStrategy
    {
    /** The command character used to send an aux serial transmit command. */
    private static final byte COMMAND_PREFIX = 't';
@@ -16,6 +13,9 @@ public class AuxSerialTransmitCommandStrategy extends CreateLabSerialDeviceNoRet
 
    public AuxSerialTransmitCommandStrategy(final byte[] bytesToTransmit)
       {
+      // pause for 10 milliseconds after every 16 bytes written
+      super(10, 16);
+
       this.command = new byte[bytesToTransmit.length + 2];
       this.command[0] = COMMAND_PREFIX;
       this.command[1] = (byte)bytesToTransmit.length;
