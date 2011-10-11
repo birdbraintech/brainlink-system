@@ -3,10 +3,12 @@ package edu.cmu.ri.createlab.brainlink;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.SortedSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import edu.cmu.ri.createlab.brainlink.commands.AuxSerialReceiveCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.AuxSerialTransmitCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.DACCommandStrategy;
@@ -34,10 +36,13 @@ import edu.cmu.ri.createlab.brainlink.commands.StoreIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffIRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.TurnOffSpeakerCommandStrategy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
+import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
+import edu.cmu.ri.createlab.device.connectivity.BaseCreateLabDeviceConnectivityManager;
 import edu.cmu.ri.createlab.serial.CreateLabSerialDeviceNoReturnValueCommandStrategy;
 import edu.cmu.ri.createlab.serial.SerialDeviceCommandExecutionQueue;
 import edu.cmu.ri.createlab.serial.SerialDeviceNoReturnValueCommandExecutor;
 import edu.cmu.ri.createlab.serial.SerialDeviceReturnValueCommandExecutor;
+import edu.cmu.ri.createlab.serial.SerialPortEnumerator;
 import edu.cmu.ri.createlab.serial.config.BaudRate;
 import edu.cmu.ri.createlab.serial.config.CharacterSize;
 import edu.cmu.ri.createlab.serial.config.FlowControl;
@@ -52,84 +57,12 @@ import org.apache.log4j.Logger;
 /**
  * @author Chris Bartley (bartley@cmu.edu)
  */
-public final class BrainLinkProxy implements BrainLinkInterface
+public final class BrainLink implements BrainLinkInterface
    {
-   private static final Logger LOG = Logger.getLogger(BrainLinkProxy.class);
+   private static final Logger LOG = Logger.getLogger(BrainLink.class);
 
-   public static final String APPLICATION_NAME = "BrainLinkProxy";
+   public static final String APPLICATION_NAME = "BrainLink";
    private static final int DELAY_IN_SECONDS_BETWEEN_PEER_PINGS = 2;
-
-   /**
-    * Tries to create a <code>BrainLinkProxy</code> for the the serial port specified by the given
-    * <code>serialPortName</code>. Returns <code>null</code> if the connection could not be established.
-    *
-    * @param serialPortName - the name of the serial port device which should be used to establish the connection
-    *
-    * @throws IllegalArgumentException if the <code>serialPortName</code> is <code>null</code>
-    */
-   public static BrainLinkProxy create(final String serialPortName)
-      {
-      // a little error checking...
-      if (serialPortName == null)
-         {
-         throw new IllegalArgumentException("The serial port name may not be null");
-         }
-
-      // create the serial port configuration
-      final SerialIOConfiguration config = new SerialIOConfiguration(serialPortName,
-                                                                     BaudRate.BAUD_115200,
-                                                                     CharacterSize.EIGHT,
-                                                                     Parity.NONE,
-                                                                     StopBits.ONE,
-                                                                     FlowControl.NONE);
-
-      try
-         {
-         // create the serial port command queue
-         final SerialDeviceCommandExecutionQueue commandQueue = SerialDeviceCommandExecutionQueue.create(APPLICATION_NAME, config, 0, null);
-
-         // see whether its creation was successful
-         if (commandQueue == null)
-            {
-            if (LOG.isEnabledFor(Level.ERROR))
-               {
-               LOG.error("Failed to open serial port '" + serialPortName + "'");
-               }
-            }
-         else
-            {
-            if (LOG.isDebugEnabled())
-               {
-               LOG.debug("Serial port '" + serialPortName + "' opened.");
-               }
-
-            // now try to do the handshake with the BrainLink to establish communication
-            final boolean wasHandshakeSuccessful = commandQueue.executeAndReturnStatus(new HandshakeCommandStrategy());
-
-            // see if the handshake was a success
-            if (wasHandshakeSuccessful)
-               {
-               LOG.info("BrainLink handshake successful!");
-
-               // now create and return the proxy
-               return new BrainLinkProxy(commandQueue, serialPortName);
-               }
-            else
-               {
-               LOG.error("Failed to handshake with BrainLink");
-               }
-
-            // the handshake failed, so shutdown the command queue to release the serial port
-            commandQueue.shutdown();
-            }
-         }
-      catch (Exception e)
-         {
-         LOG.error("Exception while trying to create the BrainLinkProxy", e);
-         }
-
-      return null;
-      }
 
    private final SerialDeviceCommandExecutionQueue commandQueue;
    private final String serialPortName;
@@ -146,16 +79,71 @@ public final class BrainLinkProxy implements BrainLinkInterface
    private final SerialDeviceReturnValueCommandExecutor<int[]> intArrayReturnValueCommandExecutor;
    private final SerialDeviceReturnValueCommandExecutor<Boolean> booleanReturnValueCommandExecutor;
 
+   private final AtomicBoolean isConnected = new AtomicBoolean(false);
    private final BrainLinkPinger brainLinkPinger = new BrainLinkPinger();
-   private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLinkProxy.peerPingScheduler"));
+   private final ScheduledExecutorService peerPingScheduler = Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("BrainLink.peerPingScheduler"));
    private final ScheduledFuture<?> peerPingScheduledFuture;
    private final Collection<CreateLabDevicePingFailureEventListener> createLabDevicePingFailureEventListeners = new HashSet<CreateLabDevicePingFailureEventListener>();
    private BrainLinkFileManipulator deviceFile;
 
-   private BrainLinkProxy(final SerialDeviceCommandExecutionQueue commandQueue, final String serialPortName)
+   /**
+    * Creates the <code>BrainLink</code> by checking all available serial ports and connecting to the first BrainLink it
+    * finds.
+    */
+   public BrainLink()
       {
-      this.commandQueue = commandQueue;
-      this.serialPortName = serialPortName;
+      this(null);
+      }
+
+   /**
+    * Creates the <code>BrainLink</code> by attempting to connect to a BrainLink on the given serial port(s).  When
+    * specifying multiple serial ports, they must be delimited by the platform's path separator character (e.g. ':' on
+    * Mac OS X, ';' on Windows, etc.)  Note that if one or more serial ports is already specified as a system property
+    * (e.g. by using the -Dgnu.io.rxtx.SerialPorts command line switch), then the serial port(s) specified in the
+    * argument to this constructor are appended to the port names specified in the system property, and the system
+    * property value is updated.
+    *
+    * @see SerialPortEnumerator#SERIAL_PORTS_SYSTEM_PROPERTY_KEY
+    */
+   @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
+   public BrainLink(final String userDefinedSerialPortNames)
+      {
+      if (userDefinedSerialPortNames != null && userDefinedSerialPortNames.trim().length() > 0)
+         {
+         LOG.debug("BrainLink.BrainLink(): processing user-defined serial port names...");
+
+         // initialize the set of names to those specified in the argument to this constructor
+         final StringBuilder serialPortNames = new StringBuilder(userDefinedSerialPortNames);
+
+         // Now see if there are also serial ports already specified in the system property (e.g. via the -D command line switch).
+         // If so, then those take precedence and the ones specified in the constructor argument will be appended
+         final String serialPortNamesAlreadyInSystemProperty = System.getProperty(SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY, null);
+         if (serialPortNamesAlreadyInSystemProperty != null && serialPortNamesAlreadyInSystemProperty.trim().length() > 0)
+            {
+            if (LOG.isDebugEnabled())
+               {
+               LOG.debug("BrainLink.BrainLink(): Existing system property value = [" + serialPortNamesAlreadyInSystemProperty + "]");
+               }
+            serialPortNames.insert(0, System.getProperty("path.separator", ":"));
+            serialPortNames.insert(0, serialPortNamesAlreadyInSystemProperty);
+            }
+
+         // now set the system property
+         System.setProperty(SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY, serialPortNames.toString());
+         if (LOG.isDebugEnabled())
+            {
+            LOG.debug("BrainLink.BrainLink(): System property [" + SerialPortEnumerator.SERIAL_PORTS_SYSTEM_PROPERTY_KEY + "] now set to [" + serialPortNames + "]");
+            }
+         }
+
+      System.out.println("Connecting to BrainLink...this may take a few seconds...");
+      LOG.debug("BrainLink.BrainLink(): creating the PseudoProxy...");
+      final PseudoProxy pseudoProxy = new BrainLinkConnectivityManager().connect();
+      isConnected.set(true);
+      LOG.debug("BrainLink.BrainLink(): PseudoProxy created for serial port");
+
+      this.commandQueue = pseudoProxy.getCommandExecutionQueue();
+      this.serialPortName = pseudoProxy.getSerialPortName();
 
       final CommandExecutionFailureHandler commandExecutionFailureHandler =
             new CommandExecutionFailureHandler()
@@ -198,10 +186,21 @@ public final class BrainLinkProxy implements BrainLinkInterface
          }
       }
 
+   @Override
+   public boolean isConnected()
+      {
+      return isConnected.get();
+      }
+
    public Integer getBatteryVoltage()
       {
       // Converts from 8 bit ADC to battery voltage in millivolts
-      return (integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy) * 2650) / 128;
+      final Integer rawValue = integerReturnValueCommandExecutor.execute(getBatteryVoltageCommandStrategy);
+      if (rawValue != null)
+         {
+         return (rawValue * 2650) / 128;
+         }
+      return null;
       }
 
    public boolean isBatteryLow()
@@ -448,6 +447,7 @@ public final class BrainLinkProxy implements BrainLinkInterface
    @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
    public boolean transmitIRSignal(final String signalName)
       {
+      // TODO: add null check for deviceFile (which can happen if the user didn't call initializeDevice first
       if (!deviceFile.containsSignal(signalName))
          {
          System.out.println("Error: signal not contained in file");
@@ -513,34 +513,37 @@ public final class BrainLinkProxy implements BrainLinkInterface
       {
       if (LOG.isDebugEnabled())
          {
-         LOG.debug("BrainLinkProxy.disconnect(" + willAddDisconnectCommandToQueue + ")");
+         LOG.debug("BrainLink.disconnect(" + willAddDisconnectCommandToQueue + ")");
          }
+
+      // set the isConnected flag to false
+      isConnected.set(false);
 
       // turn off the peer pinger
       try
          {
          peerPingScheduledFuture.cancel(false);
          peerPingScheduler.shutdownNow();
-         LOG.debug("BrainLinkProxy.disconnect(): Successfully shut down BrainLink pinger.");
+         LOG.debug("BrainLink.disconnect(): Successfully shut down BrainLink pinger.");
          }
       catch (Exception e)
          {
-         LOG.error("BrainLinkProxy.disconnect(): Exception caught while trying to shut down peer pinger", e);
+         LOG.error("BrainLink.disconnect(): Exception caught while trying to shut down peer pinger", e);
          }
 
       // optionally send goodbye command to the BrainLink
       if (willAddDisconnectCommandToQueue)
          {
-         LOG.debug("BrainLinkProxy.disconnect(): Now attempting to send the disconnect command to the BrainLink");
+         LOG.debug("BrainLink.disconnect(): Now attempting to send the disconnect command to the BrainLink");
          try
             {
             if (commandQueue.executeAndReturnStatus(disconnectCommandStrategy))
                {
-               LOG.debug("BrainLinkProxy.disconnect(): Successfully disconnected from the BrainLink.");
+               LOG.debug("BrainLink.disconnect(): Successfully disconnected from the BrainLink.");
                }
             else
                {
-               LOG.error("BrainLinkProxy.disconnect(): Failed to disconnect from the BrainLink.");
+               LOG.error("BrainLink.disconnect(): Failed to disconnect from the BrainLink.");
                }
             }
          catch (Exception e)
@@ -552,13 +555,13 @@ public final class BrainLinkProxy implements BrainLinkInterface
       // shut down the command queue, which closes the serial port
       try
          {
-         LOG.debug("BrainLinkProxy.disconnect(): shutting down the SerialDeviceCommandExecutionQueue...");
+         LOG.debug("BrainLink.disconnect(): shutting down the SerialDeviceCommandExecutionQueue...");
          commandQueue.shutdown();
-         LOG.debug("BrainLinkProxy.disconnect(): done shutting down the SerialDeviceCommandExecutionQueue");
+         LOG.debug("BrainLink.disconnect(): done shutting down the SerialDeviceCommandExecutionQueue");
          }
       catch (Exception e)
          {
-         LOG.error("BrainLinkProxy.disconnect(): Exception while trying to shut down the SerialDeviceCommandExecutionQueue", e);
+         LOG.error("BrainLink.disconnect(): Exception while trying to shut down the SerialDeviceCommandExecutionQueue", e);
          }
       }
 
@@ -580,7 +583,7 @@ public final class BrainLinkProxy implements BrainLinkInterface
             }
          catch (Exception e)
             {
-            LOG.error("BrainLinkProxy$BrainLinkPinger.run(): Exception caught while executing the peer pinger", e);
+            LOG.error("BrainLink$BrainLinkPinger.run(): Exception caught while executing the peer pinger", e);
             }
          }
 
@@ -588,18 +591,18 @@ public final class BrainLinkProxy implements BrainLinkInterface
          {
          try
             {
-            LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Peer ping failed.  Attempting to disconnect...");
+            LOG.debug("BrainLink$BrainLinkPinger.handlePingFailure(): Peer ping failed.  Attempting to disconnect...");
             disconnect(false);
-            LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Done disconnecting from the BrainLink");
+            LOG.debug("BrainLink$BrainLinkPinger.handlePingFailure(): Done disconnecting from the BrainLink");
             }
          catch (Exception e)
             {
-            LOG.error("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Exeption caught while trying to disconnect from the BrainLink", e);
+            LOG.error("BrainLink$BrainLinkPinger.handlePingFailure(): Exeption caught while trying to disconnect from the BrainLink", e);
             }
 
          if (LOG.isDebugEnabled())
             {
-            LOG.debug("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Notifying " + createLabDevicePingFailureEventListeners.size() + " listeners of ping failure...");
+            LOG.debug("BrainLink$BrainLinkPinger.handlePingFailure(): Notifying " + createLabDevicePingFailureEventListeners.size() + " listeners of ping failure...");
             }
          for (final CreateLabDevicePingFailureEventListener listener : createLabDevicePingFailureEventListeners)
             {
@@ -607,13 +610,13 @@ public final class BrainLinkProxy implements BrainLinkInterface
                {
                if (LOG.isDebugEnabled())
                   {
-                  LOG.debug("   BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Notifying " + listener);
+                  LOG.debug("   BrainLink$BrainLinkPinger.handlePingFailure(): Notifying " + listener);
                   }
                listener.handlePingFailureEvent();
                }
             catch (Exception e)
                {
-               LOG.error("BrainLinkProxy$BrainLinkPinger.handlePingFailure(): Exeption caught while notifying SerialDevicePingFailureEventListener", e);
+               LOG.error("BrainLink$BrainLinkPinger.handlePingFailure(): Exeption caught while notifying SerialDevicePingFailureEventListener", e);
                }
             }
          }
@@ -621,6 +624,168 @@ public final class BrainLinkProxy implements BrainLinkInterface
       private void forceFailure()
          {
          handlePingFailure();
+         }
+      }
+
+   private static final class PseudoProxy implements CreateLabDeviceProxy
+      {
+      private final SerialDeviceCommandExecutionQueue commandExecutionQueue;
+      private final String serialPortName;
+
+      private PseudoProxy(final SerialDeviceCommandExecutionQueue commandExecutionQueue, final String serialPortName)
+         {
+         this.commandExecutionQueue = commandExecutionQueue;
+         this.serialPortName = serialPortName;
+         }
+
+      public SerialDeviceCommandExecutionQueue getCommandExecutionQueue()
+         {
+         return commandExecutionQueue;
+         }
+
+      public String getSerialPortName()
+         {
+         return serialPortName;
+         }
+
+      @Override
+      public String getPortName()
+         {
+         return getSerialPortName();
+         }
+
+      @Override
+      public void disconnect()
+         {
+         // do nothing
+         }
+
+      @Override
+      public void addCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
+         {
+         // do nothing
+         }
+
+      @Override
+      public void removeCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
+         {
+         // do nothing
+         }
+      }
+
+   private static final class BrainLinkConnectivityManager extends BaseCreateLabDeviceConnectivityManager<PseudoProxy>
+      {
+      @Override
+      protected PseudoProxy scanForDeviceAndCreateProxy()
+         {
+         LOG.debug("BrainLink$BrainLinkConnectivityManager.scanForDeviceAndCreateProxy()");
+
+         // If the user specified one or more serial ports, then just start trying to connect to it/them.  Otherwise,
+         // check each available serial port for the target serial device, and connect to the first one found.  This
+         // makes connection time much faster for when you know the name of the serial port.
+         final SortedSet<String> availableSerialPorts;
+         if (SerialPortEnumerator.didUserDefineSetOfSerialPorts())
+            {
+            availableSerialPorts = SerialPortEnumerator.getSerialPorts();
+            }
+         else
+            {
+            availableSerialPorts = SerialPortEnumerator.getAvailableSerialPorts();
+            }
+
+         // try the serial ports
+         if ((availableSerialPorts != null) && (!availableSerialPorts.isEmpty()))
+            {
+            for (final String portName : availableSerialPorts)
+               {
+               if (LOG.isDebugEnabled())
+                  {
+                  LOG.debug("BrainLink$BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): checking serial port [" + portName + "]");
+                  }
+
+               final SerialDeviceCommandExecutionQueue queue = connect(portName);
+
+               if (queue == null)
+                  {
+                  LOG.debug("BrainLink$BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): connection failed, maybe it's not the device we're looking for?");
+                  }
+               else
+                  {
+                  LOG.debug("BrainLink$BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): connection established!");
+                  return new PseudoProxy(queue, portName);
+                  }
+               }
+            }
+         else
+            {
+            LOG.debug("BrainLink$BrainLinkConnectivityManager.scanForDeviceAndCreateProxy(): No available serial ports, returning null.");
+            }
+
+         return null;
+         }
+
+      private SerialDeviceCommandExecutionQueue connect(final String serialPortName)
+         {
+         // a little error checking...
+         if (serialPortName == null)
+            {
+            throw new IllegalArgumentException("The serial port name may not be null");
+            }
+
+         // create the serial port configuration
+         final SerialIOConfiguration config = new SerialIOConfiguration(serialPortName,
+                                                                        BaudRate.BAUD_115200,
+                                                                        CharacterSize.EIGHT,
+                                                                        Parity.NONE,
+                                                                        StopBits.ONE,
+                                                                        FlowControl.NONE);
+
+         try
+            {
+            // create the serial port command queue
+            final SerialDeviceCommandExecutionQueue queue = SerialDeviceCommandExecutionQueue.create(APPLICATION_NAME, config, 0, null);
+
+            // see whether its creation was successful
+            if (queue == null)
+               {
+               if (LOG.isEnabledFor(Level.ERROR))
+                  {
+                  LOG.error("BrainLink$BrainLinkConnectivityManager.connect(): Failed to open serial port '" + serialPortName + "'");
+                  }
+               }
+            else
+               {
+               if (LOG.isDebugEnabled())
+                  {
+                  LOG.debug("BrainLink$BrainLinkConnectivityManager.connect(): Serial port '" + serialPortName + "' opened.");
+                  }
+
+               // now try to do the handshake with the BrainLink to establish communication
+               final boolean wasHandshakeSuccessful = queue.executeAndReturnStatus(new HandshakeCommandStrategy());
+
+               // see if the handshake was a success
+               if (wasHandshakeSuccessful)
+                  {
+                  LOG.info("BrainLink$BrainLinkConnectivityManager.connect(): BrainLink handshake successful!");
+
+                  // now return the queue
+                  return queue;
+                  }
+               else
+                  {
+                  LOG.error("BrainLink$BrainLinkConnectivityManager.connect(): Failed to handshake with BrainLink");
+                  }
+
+               // the handshake failed, so shutdown the command queue to release the serial port
+               queue.shutdown();
+               }
+            }
+         catch (Exception e)
+            {
+            LOG.error("BrainLink$BrainLinkConnectivityManager.connect(): Exception while trying to create the BrainLink", e);
+            }
+
+         return null;
          }
       }
    }

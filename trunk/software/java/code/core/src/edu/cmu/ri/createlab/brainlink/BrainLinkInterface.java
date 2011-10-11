@@ -10,6 +10,9 @@ import edu.cmu.ri.createlab.device.CreateLabDeviceProxy;
  */
 public interface BrainLinkInterface extends CreateLabDeviceProxy
    {
+   /** Returns <code>true</code> if the BrainLink is connected, <code>false</code> otherwise. */
+   boolean isConnected();
+
    /**
     * Returns the current battery voltage in millivolts; returns <code>null</code> if the voltage could not be read.
     *

@@ -2,10 +2,9 @@ package edu.cmu.ri.createlab.brainlink.applications;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.SortedMap;
+import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.BrainLinkConstants;
 import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
-import edu.cmu.ri.createlab.brainlink.BrainLinkProxy;
 import edu.cmu.ri.createlab.device.CreateLabDevicePingFailureEventListener;
 import edu.cmu.ri.createlab.serial.commandline.SerialDeviceCommandLineApplication;
 import edu.cmu.ri.createlab.util.ArrayUtils;
@@ -55,46 +54,19 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
                }
             else
                {
-               final SortedMap<Integer, String> portMap = enumeratePorts();
-
-               if (!portMap.isEmpty())
-                  {
-                  final Integer index = readInteger("Connect to port number: ");
-
-                  if (index == null)
+               println("Connecting to the BrainLink...");
+               brainLink = new BrainLink();
+               brainLink.addCreateLabDevicePingFailureEventListener(
+                     new CreateLabDevicePingFailureEventListener()
                      {
-                     println("Invalid port");
-                     }
-                  else
-                     {
-                     final String serialPortName = portMap.get(index);
+                     public void handlePingFailureEvent()
+                        {
+                        println("BrainLink ping failure detected.  You will need to reconnect.");
+                        brainLink = null;
+                        }
+                     });
 
-                     if (serialPortName != null)
-                        {
-                        brainLink = connectToBrainlink(serialPortName,
-                                                       new CreateLabDevicePingFailureEventListener()
-                                                       {
-                                                       public void handlePingFailureEvent()
-                                                          {
-                                                          println("BrainLink ping failure detected.  You will need to reconnect.");
-                                                          brainLink = null;
-                                                          }
-                                                       });
-                        if (brainLink == null)
-                           {
-                           println("Connection failed!");
-                           }
-                        else
-                           {
-                           println("Connection successful!");
-                           }
-                        }
-                     else
-                        {
-                        println("Invalid port");
-                        }
-                     }
-                  }
+               println("Connection successful!");
                }
             }
          };
@@ -409,8 +381,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
       println("l         Get the state of the photoresistor");
       println("L         Continuously poll the photoresistor for 30 seconds");
       println("n         Get the analog input values");
-      println("h         Get the state of the thermistor");
-      println("H         Continuously poll the thermistor for 30 seconds");
       println("");
       println("t         Play a tone through the BrainLink's speaker");
       println("s         Turn off the speaker");
@@ -500,18 +470,6 @@ public class CommandLineBrainLink extends SerialDeviceCommandLineApplication
          }
 
       return "Analog Inputs: failed to read value";
-      }
-
-   protected final BrainLinkProxy connectToBrainlink(final String serialPortName, final CreateLabDevicePingFailureEventListener pingFailureEventListener)
-      {
-      final BrainLinkProxy brainLinkProxy = BrainLinkProxy.create(serialPortName);
-
-      if (brainLinkProxy != null)
-         {
-         brainLinkProxy.addCreateLabDevicePingFailureEventListener(pingFailureEventListener);
-         }
-
-      return brainLinkProxy;
       }
 
    protected final boolean isConnected()

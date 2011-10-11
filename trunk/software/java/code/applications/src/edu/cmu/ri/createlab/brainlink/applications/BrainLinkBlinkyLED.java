@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import edu.cmu.ri.createlab.brainlink.BrainLink;
 import edu.cmu.ri.createlab.brainlink.BrainLinkInterface;
-import edu.cmu.ri.createlab.brainlink.robots.BrainLinkSolo;
 
 /**
  * <p>
@@ -22,40 +22,27 @@ public final class BrainLinkBlinkyLED
 
    public static void main(final String[] args)
       {
-      //final BrainLinkSolo brainLinkSolo = new BrainLinkSolo("/dev/tty.brainlink");
-      final BrainLinkSolo brainLinkSolo = new BrainLinkSolo();
+      new BrainLinkBlinkyLED().run();
+      }
+
+   private void run()
+      {
+      final BrainLinkInterface brainLink = new BrainLink();
 
       System.out.println("");
       System.out.println("Press ENTER to quit.");
 
       final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
       int colorIndex = 0;
-      while (true)
+
+      do
          {
-         final BrainLinkInterface brainLink = brainLinkSolo.getBrainLink();
-         if (brainLink != null)
-            {
-            brainLink.setFullColorLED(COLORS[colorIndex]);
-            if (sleep(in, 100))
-               {
-               break;
-               }
-
-            colorIndex = (colorIndex >= COLORS.length - 1) ? 0 : colorIndex + 1;
-            }
-         else
-            {
-            System.out.println("BrainLink is null...aborting.");
-            break;
-            }
+         brainLink.setFullColorLED(COLORS[colorIndex]);
+         colorIndex = (colorIndex >= COLORS.length - 1) ? 0 : colorIndex + 1;
          }
+      while (brainLink.isConnected() && !sleep(in, 100));
 
-      brainLinkSolo.disconnect();
-      }
-
-   private BrainLinkBlinkyLED()
-      {
-      // nothing to do
+      brainLink.disconnect();
       }
 
    @SuppressWarnings({"BusyWait"})
