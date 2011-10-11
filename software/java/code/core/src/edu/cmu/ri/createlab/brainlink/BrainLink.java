@@ -447,30 +447,37 @@ public final class BrainLink implements BrainLinkInterface
    @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
    public boolean transmitIRSignal(final String signalName)
       {
-      // TODO: add null check for deviceFile (which can happen if the user didn't call initializeDevice first
-      if (!deviceFile.containsSignal(signalName))
+      // do a null check for deviceFile, which can happen if the user didn't call initializeDevice first
+      if (deviceFile == null)
          {
-         System.out.println("Error: signal not contained in file");
-         return false;
-         }
-
-      final int[] signalValues = deviceFile.getSignalValues(signalName);
-      final int repeatTime = deviceFile.getSignalRepeatTime(signalName);
-
-      if (deviceFile.isEncoded())
-         {
-         final byte[] signalInBytes = new byte[signalValues.length];
-         for (int i = 0; i < signalValues.length; i++)
-            {
-            signalInBytes[i] = (byte)signalValues[i];
-            }
-         final byte repeat1 = getHighByteFromInt(repeatTime);
-         final byte repeat2 = getLowByteFromInt(repeatTime);
-         return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
+         throw new IllegalStateException("Cannot transmit IR signal because the device has not been initialized yet.  You must call initializeDevice() before calling this method.");
          }
       else
          {
-         return sendRawIR(signalValues, repeatTime);
+         if (!deviceFile.containsSignal(signalName))
+            {
+            System.out.println("Error: signal not contained in file");
+            return false;
+            }
+
+         final int[] signalValues = deviceFile.getSignalValues(signalName);
+         final int repeatTime = deviceFile.getSignalRepeatTime(signalName);
+
+         if (deviceFile.isEncoded())
+            {
+            final byte[] signalInBytes = new byte[signalValues.length];
+            for (int i = 0; i < signalValues.length; i++)
+               {
+               signalInBytes[i] = (byte)signalValues[i];
+               }
+            final byte repeat1 = getHighByteFromInt(repeatTime);
+            final byte repeat2 = getLowByteFromInt(repeatTime);
+            return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
+            }
+         else
+            {
+            return sendRawIR(signalValues, repeatTime);
+            }
          }
       }
 
