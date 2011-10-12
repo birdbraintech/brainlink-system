@@ -21,7 +21,8 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    Integer getBatteryVoltage();
 
    /**
-    * Returns true if the battery reads low (less than 3500 millivolts), false otherwise
+    * Returns true if the battery reads low (less than 3500 millivolts), false otherwise.
+    *
     * @return Low battery status
     */
    boolean isBatteryLow();
@@ -42,7 +43,6 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
     * Sets the full color LED to the given {@link Color}.
     *
     * @param   color sets the color of the LED
-    *
     * @return <code>true</code> if LED was successfully set, <code>false</code> otherwise
     */
    boolean setFullColorLED(final Color color);
@@ -64,6 +64,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     * Returns the value of the accelerometer's X axis in Gs; returns <code>null</code> if the accelerometer could not be
     * read.
+    *
     * @return the X acceleration in Gs
     */
    Double getXAccelerometer();
@@ -71,6 +72,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     * Returns the value of the accelerometer's Y axis in Gs; returns <code>null</code> if the accelerometer could not be
     * read.
+    *
     * @return the Y Acceleration in Gs
     */
    Double getYAccelerometer();
@@ -78,6 +80,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     * Returns the value of the accelerometer's Z axis in Gs; returns <code>null</code> if the accelerometer could not be
     * read.
+    *
     * @return the Z acceleration in Gs
     */
    Double getZAccelerometer();
@@ -85,6 +88,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     * Returns <code>true</code> if the BrainLink has been shaken since the last accelerometer read, <code>false</code>
     * otherise.  Returns <code>null</code> if the accelerometer could not be read.
+    *
     * @return <code>true</code> if the accelerometer was shaken, <code>false</code> otherwise, <code>null</code> if read was unsuccessful
     */
    Boolean wasShaken();
@@ -92,6 +96,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     * Returns <code>true</code> if the BrainLink has been tapped since the last accelerometer read, <code>false</code>
     * otherise.  Returns <code>null</code> if the accelerometer could not be read.
+    *
     * @return <code>true</code> if the accelerometer was tapped, <code>false</code> otherwise, <code>null</code> if read was unsuccessful
     */
    Boolean wasTapped();
@@ -138,14 +143,6 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    boolean setDigitalOutput(final int port, final boolean value);
 
    /**
-    * Configures the PWM module's frequency.
-    *
-    * @param frequency the frequency in Hertz to set the PWM waveform to.
-    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
-    */
-   //  boolean configurePWM(final int frequency);
-
-   /**
     * Sets the duty cycle of one of the two PWM ports.
     *
     * @param port the PWM port to set
@@ -168,10 +165,10 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
     *  Sets the baud rate of the auxiliary serial port. Only the baud rate is configurable. The serial port always uses
     *  8 bits, no flow control, and one stop bit.
     *
-    * @param baudrate the baudrate, in baud, to configure the serial port to.
+    * @param baudRate the baudrate, in baud, to configure the serial port to.
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   boolean configureSerialPort(final int baudrate);
+   boolean configureSerialPort(final int baudRate);
 
    /**
     * Transmits a stream of bytes over the auxiliary serial port.
@@ -214,7 +211,7 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
     * @param encoded If the file is encoded or raw
     * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
     */
-   boolean initializeDevice(String fileName, boolean encoded);
+   boolean initializeDevice(final String fileName, final boolean encoded);
 
    /**
     * Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.
@@ -238,11 +235,12 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
    /**
     *  Sends the signal stored in fileName to Brainlink for transmission over IR. Handles both encoded and raw signal
     *  files.
+    *
     * @param signalName The name of the signal
     * @return true if transmission succeeded
     * @throws IllegalStateException if the device has not yet been initialized with a call to {@link #initializeDevice(String, boolean)}
     */
-   boolean transmitIRSignal(String signalName);
+   boolean transmitIRSignal(final String signalName);
 
    /**
     * Used by transmitIRSignal if encoded is true. Sends an encoded IR command.
