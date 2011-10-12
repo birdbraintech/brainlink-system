@@ -20,7 +20,6 @@ import edu.cmu.ri.createlab.brainlink.commands.GetAccelerometerCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetAnalogInputsCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetBatteryVoltageCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.GetPhotoresistorCommandStrategy;
-import edu.cmu.ri.createlab.brainlink.commands.GetThermistorCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.HandshakeCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.IRCommandStrategy;
 import edu.cmu.ri.createlab.brainlink.commands.InitializeIRCommandStrategy;
@@ -73,7 +72,6 @@ public final class BrainLink implements BrainLinkInterface
    private final GetAccelerometerCommandStrategy getAccelerometerCommandStrategy = new GetAccelerometerCommandStrategy();
    private final GetPhotoresistorCommandStrategy getPhotoresistorCommandStrategy = new GetPhotoresistorCommandStrategy();
    private final GetAnalogInputsCommandStrategy getAnalogInputsCommandStrategy = new GetAnalogInputsCommandStrategy();
-   private final GetThermistorCommandStrategy getThermistorCommandStrategy = new GetThermistorCommandStrategy();
    private final SerialDeviceNoReturnValueCommandExecutor noReturnValueCommandExecutor;
    private final SerialDeviceReturnValueCommandExecutor<Integer> integerReturnValueCommandExecutor;
    private final SerialDeviceReturnValueCommandExecutor<int[]> intArrayReturnValueCommandExecutor;
@@ -165,11 +163,14 @@ public final class BrainLink implements BrainLinkInterface
                                                                       TimeUnit.SECONDS);
       }
 
+   /** Returns the name of the serial port to which this BrainLink is connected. */
+   @Override
    public String getPortName()
       {
       return serialPortName;
       }
 
+   @Override
    public void addCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
       {
       if (listener != null)
@@ -178,6 +179,7 @@ public final class BrainLink implements BrainLinkInterface
          }
       }
 
+   @Override
    public void removeCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
       {
       if (listener != null)
@@ -186,12 +188,19 @@ public final class BrainLink implements BrainLinkInterface
          }
       }
 
+   /** Returns <code>true</code> if the BrainLink is connected, <code>false</code> otherwise. */
    @Override
    public boolean isConnected()
       {
       return isConnected.get();
       }
 
+   /**
+    * Returns the current battery voltage in millivolts; returns <code>null</code> if the voltage could not be read.
+    *
+    * @return The battery voltage reading
+    */
+   @Override
    public Integer getBatteryVoltage()
       {
       // Converts from 8 bit ADC to battery voltage in millivolts
@@ -203,26 +212,62 @@ public final class BrainLink implements BrainLinkInterface
       return null;
       }
 
+   /**
+    * Returns true if the battery reads low (less than 3500 millivolts), false otherwise.
+    *
+    * @return Low battery status
+    */
+   @Override
    public boolean isBatteryLow()
       {
       return getBatteryVoltage() < 3500;
       }
 
+   /**
+    * Sets the color of the LED in the Brainlink.  The LED can be any color that can be created by mixing red, green,
+    * and blue; turning on all three colors in equal amounts results in white light.  Valid ranges for the red, green,
+    * and blue elements are 0 to 255.
+    *
+    * @param  red sets the intensity of the red element of the LED
+    * @param  green sets the intensity of the green element of the LED
+    * @param  blue sets the intensity of the blue element of the LED
+    * @return <code>true</code> if LED was successfully set, <code>false</code> otherwise
+    */
+   @Override
    public boolean setFullColorLED(final int red, final int green, final int blue)
       {
       return noReturnValueCommandExecutor.execute(new FullColorLEDCommandStrategy(red, green, blue));
       }
 
+   /**
+    * Sets the full color LED to the given {@link Color}.
+    *
+    * @param   color sets the color of the LED
+    * @return <code>true</code> if LED was successfully set, <code>false</code> otherwise
+    */
+   @Override
    public boolean setFullColorLED(final Color color)
       {
       return setFullColorLED(color.getRed(), color.getGreen(), color.getBlue());
       }
 
+   /**
+    * Returns the light sensor values; returns <code>null</code> if the light sensors could not be read.
+    *
+    * @return an int containing the light sensor value.
+    */
+   @Override
    public Integer getLightSensor()
       {
       return integerReturnValueCommandExecutor.execute(getPhotoresistorCommandStrategy);
       }
 
+   /**
+    * Returns the accelerometer values in Gs; returns <code>null</code> if the accelerometer could not be read.
+    *
+    * @return an array containing the X, Y, and Z accelerometer readings in Gs
+    */
+   @Override
    public double[] getAccelerometerValuesInGs()
       {
       final int[] rawValues = getRawAccelerometerState();
@@ -233,16 +278,37 @@ public final class BrainLink implements BrainLinkInterface
       return null;
       }
 
+   /**
+    * Returns the value of the accelerometer's X axis in Gs; returns <code>null</code> if the accelerometer could not be
+    * read.
+    *
+    * @return the X acceleration in Gs
+    */
+   @Override
    public Double getXAccelerometer()
       {
       return getAccelerometerAxisValue(0);
       }
 
+   /**
+    * Returns the value of the accelerometer's Y axis in Gs; returns <code>null</code> if the accelerometer could not be
+    * read.
+    *
+    * @return the Y Acceleration in Gs
+    */
+   @Override
    public Double getYAccelerometer()
       {
       return getAccelerometerAxisValue(1);
       }
 
+   /**
+    * Returns the value of the accelerometer's Z axis in Gs; returns <code>null</code> if the accelerometer could not be
+    * read.
+    *
+    * @return the Z acceleration in Gs
+    */
+   @Override
    public Double getZAccelerometer()
       {
       return getAccelerometerAxisValue(2);
@@ -261,6 +327,13 @@ public final class BrainLink implements BrainLinkInterface
       return null;
       }
 
+   /**
+    * Returns <code>true</code> if the BrainLink has been shaken since the last accelerometer read, <code>false</code>
+    * otherise.  Returns <code>null</code> if the accelerometer could not be read.
+    *
+    * @return <code>true</code> if the accelerometer was shaken, <code>false</code> otherwise, <code>null</code> if read was unsuccessful
+    */
+   @Override
    public Boolean wasShaken()
       {
       final int[] rawValues = getRawAccelerometerState();
@@ -272,6 +345,13 @@ public final class BrainLink implements BrainLinkInterface
       return false;
       }
 
+   /**
+    * Returns <code>true</code> if the BrainLink has been tapped since the last accelerometer read, <code>false</code>
+    * otherise.  Returns <code>null</code> if the accelerometer could not be read.
+    *
+    * @return <code>true</code> if the accelerometer was tapped, <code>false</code> otherwise, <code>null</code> if read was unsuccessful
+    */
+   @Override
    public Boolean wasTapped()
       {
       final int[] rawValues = getRawAccelerometerState();
@@ -283,6 +363,13 @@ public final class BrainLink implements BrainLinkInterface
       return false;
       }
 
+   /**
+    * Returns <code>true</code> if the BrainLink has been shaken or tapped since the last accelerometer read,
+    * <code>false</code> otherise.  Returns <code>null</code> if the accelerometer could not be read.
+    *
+    * @return <code>true</code> if the accelerometer was shaken or tapped, <code>false</code> otherwise, <code>null</code> if read was unsuccessful
+    */
+   @Override
    public Boolean wasShakenOTapped()
       {
       final int[] rawValues = getRawAccelerometerState();
@@ -301,11 +388,24 @@ public final class BrainLink implements BrainLinkInterface
       return intArrayReturnValueCommandExecutor.execute(getAccelerometerCommandStrategy);
       }
 
+   /**
+    * Returns the analog input values; returns <code>null</code> if the inputs could not be read.
+    *
+    * @return A six element array containing the raw sensor values of the six external analog inputs
+    */
+   @Override
    public int[] getAnalogInputs()
       {
       return intArrayReturnValueCommandExecutor.execute(getAnalogInputsCommandStrategy);
       }
 
+   /**
+    * Returns the value of the given analog input; returns <code>null</code> if the specified port could not be read or
+    * is invalid.
+    *
+    * @return The raw analog reading (0-255) of one of the six external analog ports, <code>null</code> if the port couldn't be read
+    */
+   @Override
    public Integer getAnalogInput(final int port)
       {
       if (0 <= port && port < BrainLinkConstants.ANALOG_INPUT_COUNT)
@@ -319,101 +419,130 @@ public final class BrainLink implements BrainLinkInterface
       return null;
       }
 
+   /**
+    *  Returns true if the digital input is logic high, false if low, and null if the port was invalid or could not be read.
+    *
+    * @param port sets the input port to read, valid numbers are 0-9
+    * @return <code>true</code> if the value on the port is logic high, <code>false</code> if logic low, and null if it
+    * could not be read
+    */
+   @Override
    public Boolean getDigitalInput(final int port)
       {
       return booleanReturnValueCommandExecutor.execute(new DigitalInputCommandStrategy(port));
       }
 
+   /**
+    *  Sets one of the digital output ports; true for logic high, false for low.
+    *
+    * @param port sets the output port to use, valid numbers are 0-9
+    * @param value sets the port to either logic high or low
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean setDigitalOutput(final int port, final boolean value)
       {
       return noReturnValueCommandExecutor.execute(new DigitalOutputCommandStrategy(port, value));
       }
 
+   /**
+    * Sets the duty cycle of one of the two PWM ports.
+    *
+    * @param port the PWM port to set
+    * @param dutyCycle the duty of the PWM signal, specified in % (0-100)
+    * @param PWMfrequency the frequency of the PWM signal in Hertz.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean setPWM(final int port, final int dutyCycle, final int PWMfrequency)
       {
       return noReturnValueCommandExecutor.execute(new PWMCommandStrategy(port, dutyCycle, PWMfrequency));
       }
 
+   /**
+    * Sets the voltage of one of the two DAC ports
+    *
+    * @param port the DAC port to set
+    * @param value the value, in milliVolts, to set the DAC to.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean setDAC(final int port, final int value)
       {
       return noReturnValueCommandExecutor.execute(new DACCommandStrategy(port, value));
       }
 
+   /**
+    *  Sets the baud rate of the auxiliary serial port. Only the baud rate is configurable. The serial port always uses
+    *  8 bits, no flow control, and one stop bit.
+    *
+    * @param baudRate the baudrate, in baud, to configure the serial port to.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean configureSerialPort(final int baudRate)
       {
       return noReturnValueCommandExecutor.execute(new SetAuxSerialConfigurationCommandStrategy(baudRate));
       }
 
+   /**
+    * Transmits a stream of bytes over the auxiliary serial port.
+    *
+    * @param  bytesToSend an array of bytes to send over the serial port
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean transmitBytesOverSerial(final byte[] bytesToSend)
       {
       return noReturnValueCommandExecutor.execute(new AuxSerialTransmitCommandStrategy(bytesToSend));
       }
 
+   /**
+    *  Returns the auxiliary serial port's receive buffer.
+    *
+    * @return an array of ints corresponding to the serial receive buffer. The buffer can only handle 256 bytes at a time,
+    * so in high-data transfer applications this must be checked frequently.
+    */
+   @Override
    public int[] receiveBytesOverSerial()
       {
       return intArrayReturnValueCommandExecutor.execute(new AuxSerialReceiveCommandStrategy());
       }
 
+   /**
+    * Plays a tone specified at the frequency in hertz specified by frequency.  Tone will not stop until turnOffSpeaker
+    * is called.
+    *
+    * @param frequency frequency in Hz of the tone to play
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean playTone(final int frequency)
       {
       return noReturnValueCommandExecutor.execute(new PlayToneCommandStrategy(frequency));
       }
 
+   /**
+    * Turns off the speaker
+    *
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    public boolean turnOffSpeaker()
       {
       return noReturnValueCommandExecutor.execute(turnOffSpeakerCommandStrategy);
       }
 
-   public boolean initializeIR(final byte[] initializationBytes)
-      {
-      return noReturnValueCommandExecutor.execute(new InitializeIRCommandStrategy(initializationBytes));
-      }
-
-   public boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy)
-      {
-      return noReturnValueCommandExecutor.execute(commandStrategy);
-      }
-
-   public boolean sendSimpleIRCommand(final byte command)
-      {
-      return sendSimpleIRCommand(new SimpleIRCommandStrategy(command));
-      }
-
-   public boolean turnOffIR()
-      {
-      return noReturnValueCommandExecutor.execute(turnOffIRCommandStrategy);
-      }
-
-   public boolean sendIRCommand(final IRCommandStrategy commandStrategy)
-      {
-      return noReturnValueCommandExecutor.execute(commandStrategy);
-      }
-
-   public int[] recordIR()
-      {
-      return intArrayReturnValueCommandExecutor.execute(new RecordIRCommandStrategy());
-      }
-
-   public boolean storeIR(final int position)
-      {
-      return noReturnValueCommandExecutor.execute(new StoreIRCommandStrategy(position));
-      }
-
-   public boolean playIR(final int position, final int repeatTime)
-      {
-      return noReturnValueCommandExecutor.execute(new PlayStoredIRCommandStrategy(position, repeatTime));
-      }
-
-   public boolean sendRawIR(final int[] signal, final int repeatTime)
-      {
-      return noReturnValueCommandExecutor.execute(new SendRawIRCommandStrategy(signal, repeatTime));
-      }
-
-   public int[] printIR(final int position)
-      {
-      return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
-      }
-
+   /**
+    * Opens the device file specified by fileName and initializes the IR if the file is encoded. A number of encoded
+    * files for popular robot platforms are provided in the "devices" directory, and you can make your own with the "StoreAndPlayEncodedSignals" utility.
+    * The filename argument should not include the ".encsig" or ".rawsig" file name extensions - this is automatically appended.
+    *
+    * @param fileName The name of the file with Initialization data.
+    * @param encoded If the file is encoded or raw
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
    @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
    public boolean initializeDevice(final String fileName, final boolean encoded)
       {
@@ -442,8 +571,52 @@ public final class BrainLink implements BrainLinkInterface
       return true;
       }
 
+   /**
+    * Initializes the Infrared signal to mimic a given robot's communication protocol specified by initializationBytes.
+    *
+    * @param initializationBytes The bytes to send the Brainlink to configure it with a specific IR communication protocol.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean initializeIR(final byte[] initializationBytes)
+      {
+      return noReturnValueCommandExecutor.execute(new InitializeIRCommandStrategy(initializationBytes));
+      }
+
+   @Override
+   public boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy)
+      {
+      return noReturnValueCommandExecutor.execute(commandStrategy);
+      }
+
+   @Override
+   public boolean sendSimpleIRCommand(final byte command)
+      {
+      return sendSimpleIRCommand(new SimpleIRCommandStrategy(command));
+      }
+
+   /**
+    * Turns off the IR signal, used in Stop methods in certain robot classes
+    *
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean turnOffIR()
+      {
+      return noReturnValueCommandExecutor.execute(turnOffIRCommandStrategy);
+      }
+
+   /**
+    *  Sends the signal stored in fileName to Brainlink for transmission over IR. Handles both encoded and raw signal
+    *  files.
+    *
+    * @param signalName The name of the signal
+    * @return true if transmission succeeded
+    * @throws IllegalStateException if the device has not yet been initialized with a call to {@link #initializeDevice(String, boolean)}
+    */
    // Maybe split this into two functions so as to take advantage of the new functions for getting data
    // With the BrainLinkFileManipulator
+   @Override
    @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
    public boolean transmitIRSignal(final String signalName)
       {
@@ -479,6 +652,84 @@ public final class BrainLink implements BrainLinkInterface
             return sendRawIR(signalValues, repeatTime);
             }
          }
+      }
+
+   /**
+    * Used by transmitIRSignal if encoded is true. Sends an encoded IR command.
+    *
+    * @param commandStrategy An array of bytes encoding the command to send
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean sendIRCommand(final IRCommandStrategy commandStrategy)
+      {
+      return noReturnValueCommandExecutor.execute(commandStrategy);
+      }
+
+   /**
+    *  Will record any IR signal detected by the IR receiver, and returns this signal's measurements as an array of ints.
+    *  Array elements are measurements in milliseconds of the time between the signal's falling or rising edges.
+    *  The signal always begins with a rising edge and ends with a falling edge, therefore an even number of elements is always
+    *  expected.
+    *
+    * @return An array of time measurements corresponding to an infrared signal.
+    */
+   @Override
+   public int[] recordIR()
+      {
+      return intArrayReturnValueCommandExecutor.execute(new RecordIRCommandStrategy());
+      }
+
+   /**
+    *  Stores the most recently recorded IR signal to the Brainlink's on-board EEPROM (which survives power cycling).
+    *  There are five EEPROM positions to store IR signals to, so Brainlink can store up to 5 raw IR signals.
+    *
+    * @param position the position to store the IR signal to (range is 0 to 4)
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean storeIR(final int position)
+      {
+      return noReturnValueCommandExecutor.execute(new StoreIRCommandStrategy(position));
+      }
+
+   /**
+    *  Sends the IR signal recorded in the EEPROM position specified.
+    *
+    * @param position the position to play the IR signal from (range is 0 to 4)
+    * @param repeatTime the amount of delay, in milliseconds, between successive signals. Use 0 if the signal should not repeat.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean playIR(final int position, final int repeatTime)
+      {
+      return noReturnValueCommandExecutor.execute(new PlayStoredIRCommandStrategy(position, repeatTime));
+      }
+
+   /**
+    *  Used by transmitIRSignal. Sends a "Raw" format IR signal to transmit over the tether's IR LED.
+    *
+    * @param signal the raw IR signal consisting of time measurements.
+    * @param repeatTime the amount of delay, in milliseconds, between successive signals. Use 0 if the signal should not repeat.
+    * @return <code>true</code> if the call was made successfully, <code>false</code> otherwise
+    */
+   @Override
+   public boolean sendRawIR(final int[] signal, final int repeatTime)
+      {
+      return noReturnValueCommandExecutor.execute(new SendRawIRCommandStrategy(signal, repeatTime));
+      }
+
+   /**
+    *  Returns the IR signal recorded in the EEPROM position specified so that the host computer can read and analyze it.
+    *  Note that the signal returned is of the same format as that returned by recordIR.
+    *
+    * @param position the position to print the IR signal from (range is 0 to 4)
+    * @return An array of time measurements corresponding to an infrared signal, null if invalid.
+    */
+   @Override
+   public int[] printIR(final int position)
+      {
+      return intArrayReturnValueCommandExecutor.execute(new PrintStoredIRCommandStrategy(position));
       }
 
    private byte getHighByteFromInt(final int val)
