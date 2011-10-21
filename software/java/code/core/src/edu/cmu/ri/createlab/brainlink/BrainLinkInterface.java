@@ -221,10 +221,6 @@ public interface BrainLinkInterface extends CreateLabDeviceProxy
     */
    boolean initializeIR(final byte[] initializationBytes);
 
-   boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy);
-
-   boolean sendSimpleIRCommand(final byte command);
-
    /**
     * Turns off the IR signal, used in Stop methods in certain robot classes
     *

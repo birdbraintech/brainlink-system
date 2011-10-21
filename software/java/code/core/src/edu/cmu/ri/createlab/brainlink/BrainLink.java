@@ -54,6 +54,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
+ * API to control and write programs for Brainlink.
  * @author Chris Bartley (bartley@cmu.edu)
  */
 public final class BrainLink implements BrainLinkInterface
@@ -86,7 +87,7 @@ public final class BrainLink implements BrainLinkInterface
 
    /**
     * Creates the <code>BrainLink</code> by checking all available serial ports and connecting to the first BrainLink it
-    * finds.
+    * finds. This can take several minutes.
     */
    public BrainLink()
       {
@@ -170,6 +171,10 @@ public final class BrainLink implements BrainLinkInterface
       return serialPortName;
       }
 
+       /**
+        *  Used by internal Brainlink code to determine if unexpected disconnect occurs.
+         * @param listener
+        */
    @Override
    public void addCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
       {
@@ -179,6 +184,10 @@ public final class BrainLink implements BrainLinkInterface
          }
       }
 
+       /**
+        *  Used by internal Brainlink code to determine if unexpected disconnect occurs.
+         * @param listener
+        */
    @Override
    public void removeCreateLabDevicePingFailureEventListener(final CreateLabDevicePingFailureEventListener listener)
       {
@@ -583,18 +592,6 @@ public final class BrainLink implements BrainLinkInterface
       return noReturnValueCommandExecutor.execute(new InitializeIRCommandStrategy(initializationBytes));
       }
 
-   @Override
-   public boolean sendSimpleIRCommand(final SimpleIRCommandStrategy commandStrategy)
-      {
-      return noReturnValueCommandExecutor.execute(commandStrategy);
-      }
-
-   @Override
-   public boolean sendSimpleIRCommand(final byte command)
-      {
-      return sendSimpleIRCommand(new SimpleIRCommandStrategy(command));
-      }
-
    /**
     * Turns off the IR signal, used in Stop methods in certain robot classes
     *
@@ -742,6 +739,10 @@ public final class BrainLink implements BrainLinkInterface
       return (byte)((val << 24) >> 24);
       }
 
+       /**
+        * Blocks further execution of the thread
+        * @param millis Time in milliseconds to block execution for
+        */
    @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
    public void sleep(final int millis)
       {
@@ -762,6 +763,9 @@ public final class BrainLink implements BrainLinkInterface
          }
       }
 
+       /**
+        * Disconnects brainlink, making it available for connection by other programs. We recommend calling this method at the end of each program.
+        */
    public void disconnect()
       {
       disconnect(true);
