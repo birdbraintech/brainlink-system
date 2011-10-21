@@ -436,11 +436,11 @@ public class BrainLinkFileManipulator {
     }
 
     /**
-     * Gets the repeat time in milliseconds of this signal
+     * Gets the repeat time bytes (if encoded) or time in milliseconds (if raw) of this signal
      * @param signalName The signal to get the repeat time for
-     * @return The signal's repeat time in milliseconds, 0 if none is specified
+     * @return The signal's repeat time in milliseconds (1 element array), or in bytes (2 element array, 0 if none is specified, null in case signal name wasn't found
      */
-    public Integer getSignalRepeatTime(String signalName)
+    public int[] getSignalRepeatTime(String signalName)
     {
          if(updateData) {
              readFileIntoMap();
@@ -450,17 +450,20 @@ public class BrainLinkFileManipulator {
              System.out.println("Warning, file is empty");
              return null;
          }
-        if(isEncoded) {
+         if(isEncoded) {
             int[] signalValues = fileContents.get(signalName);
-            return ((signalValues[signalValues.length-2]*256 + signalValues[signalValues.length-1])/500);
+            int[] toReturn = new int[2];
+            toReturn[0] = signalValues[signalValues.length-2];
+            toReturn[1] = signalValues[signalValues.length-1];
+            return toReturn;
         }
         else {
             int[] signalValues = fileContents.get(signalName);
-            return signalValues[signalValues.length-1];
-
-        }
+            int[] toReturn = new int[1];
+            toReturn[0] = signalValues[signalValues.length-1];
+            return toReturn;
+         }
     }
-
     /**
      * Returns the current file directory
      * @return The current directory for encoded/raw files

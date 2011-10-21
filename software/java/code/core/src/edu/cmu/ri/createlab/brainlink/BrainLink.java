@@ -631,7 +631,7 @@ public final class BrainLink implements BrainLinkInterface
             }
 
          final int[] signalValues = deviceFile.getSignalValues(signalName);
-         final int repeatTime = deviceFile.getSignalRepeatTime(signalName);
+         final int[] repeatTime = deviceFile.getSignalRepeatTime(signalName);
 
          if (deviceFile.isEncoded())
             {
@@ -640,13 +640,11 @@ public final class BrainLink implements BrainLinkInterface
                {
                signalInBytes[i] = (byte)signalValues[i];
                }
-            final byte repeat1 = getHighByteFromInt(repeatTime);
-            final byte repeat2 = getLowByteFromInt(repeatTime);
-            return sendIRCommand(new IRCommandStrategy(signalInBytes, repeat1, repeat2));
+            return sendIRCommand(new IRCommandStrategy(signalInBytes, (byte)repeatTime[0], (byte)repeatTime[1]));
             }
          else
             {
-            return sendRawIR(signalValues, repeatTime);
+            return sendRawIR(signalValues, repeatTime[0]);
             }
          }
       }
