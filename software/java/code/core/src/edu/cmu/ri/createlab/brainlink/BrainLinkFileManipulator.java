@@ -403,7 +403,7 @@ public class BrainLinkFileManipulator {
     /**
      * Gets the values of either an encoded or raw signal.
      * @param signalName The signal to get values for
-     * @return The signal value data, either raw or encoded (dependent on whether constructor specified an encoded or raw file)
+     * @return The signal value data, either raw or encoded (dependent on whether constructor specified an encoded or raw file). If raw, the first value is the length of the signal.
      */
     public int[] getSignalValues(String signalName)
     {

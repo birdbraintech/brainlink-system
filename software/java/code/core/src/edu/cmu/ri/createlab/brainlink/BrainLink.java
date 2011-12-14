@@ -631,6 +631,7 @@ public final class BrainLink implements BrainLinkInterface
             }
 
          final int[] signalValues = deviceFile.getSignalValues(signalName);
+
          final int[] repeatTime = deviceFile.getSignalRepeatTime(signalName);
 
          if (deviceFile.isEncoded())
@@ -644,7 +645,9 @@ public final class BrainLink implements BrainLinkInterface
             }
          else
             {
-            return sendRawIR(signalValues, repeatTime[0]);
+            final int[] signalToSend = new int[signalValues.length-1];
+            System.arraycopy(signalValues, 1, signalToSend, 0, signalToSend.length);
+            return sendRawIR(signalToSend, repeatTime[0]);
             }
          }
       }
